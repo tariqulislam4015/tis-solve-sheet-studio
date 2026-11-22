@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TIS Solve Sheet Studio — তারিকুল ইসলাম (সুমন)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2322c55e'/%3E%3Cstop offset='1' stop-color='%230ea5a4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Cpath d='M18 12h20l10 10v30H18z' fill='%23fff'/%3E%3Cpath d='M24 36l6 6 12-14' stroke='%2316a34a' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070d1a; --bg2:#0c1528; --card:rgba(255,255,255,.045); --card2:rgba(255,255,255,.07); --line:rgba(255,255,255,.10);
+  --tx:#e8eef9; --mut:#94a3b8; --acc:#22c55e; --acc2:#14b8a6; --gold:#fbbf24; --red:#f87171;
+  --bn:'Hind Siliguri','Noto Sans Bengali','Nirmala UI','Vrinda','SolaimanLipi',sans-serif;
+  --en:'Poppins','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--bn),var(--en);font-size:15px;line-height:1.55}
+body{background:radial-gradient(1200px 600px at 10% -10%,rgba(34,197,94,.16),transparent 60%),radial-gradient(900px 500px at 100% 0%,rgba(20,184,166,.14),transparent 60%),var(--bg);min-height:100vh}
+a{color:inherit}
+button,input,select{font-family:inherit;font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+/* ---------- top bar ---------- */
+.top{display:flex;align-items:center;gap:14px;padding:18px 0}
+.applogo{width:52px;height:52px;flex:none;filter:drop-shadow(0 6px 18px rgba(34,197,94,.35));transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.applogo:hover{transform:rotate(-8deg) scale(1.08)}
+.applogo .chk{stroke-dasharray:40;stroke-dashoffset:40;animation:draw 1.2s .5s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.brand h1{margin:0;font-family:var(--en);font-weight:800;font-size:22px;letter-spacing:.2px}
+.brand h1 span{background:linear-gradient(90deg,var(--acc),var(--acc2),#60a5fa,var(--acc));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 6s linear infinite}
+.brand p{margin:0;color:var(--mut);font-size:13px}
+.top .badge{margin-left:auto;font-size:12px;color:var(--mut);border:1px solid var(--line);padding:6px 12px;border-radius:999px;display:flex;gap:6px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 0 rgba(34,197,94,.7);animation:ping 2s infinite}
+@keyframes ping{70%{box-shadow:0 0 0 10px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+@keyframes flow{to{background-position:300% 0}}
+
+/* ---------- hero ---------- */
+.hero{display:grid;grid-template-columns:360px 1fr;gap:22px;margin:6px 0 26px}
+@media(max-width:900px){.hero{grid-template-columns:1fr}}
+.glass{background:var(--card);border:1px solid var(--line);border-radius:22px;backdrop-filter:blur(8px)}
+.profile{padding:26px 22px 22px;text-align:center;position:relative;overflow:hidden}
+.profile:before{content:"";position:absolute;inset:-40% -40% auto;height:220px;background:radial-gradient(closest-side,rgba(34,197,94,.25),transparent);animation:float 7s ease-in-out infinite}
+.ring{position:relative;width:176px;height:176px;margin:4px auto 16px;border-radius:50%;animation:float 5s ease-in-out infinite}
+.ring:before{content:"";position:absolute;inset:-7px;border-radius:50%;background:conic-gradient(from 0deg,var(--acc),var(--acc2),#60a5fa,var(--gold),var(--acc));animation:spin 6s linear infinite;filter:blur(.3px)}
+.ring:after{content:"";position:absolute;inset:-18px;border-radius:50%;background:conic-gradient(from 180deg,transparent,rgba(34,197,94,.45),transparent 40%);animation:spin 9s linear infinite reverse;filter:blur(10px)}
+.ring img{position:relative;z-index:1;width:100%;height:100%;object-fit:cover;border-radius:50%;border:5px solid var(--bg2);display:block}
+.ring .online{position:absolute;z-index:2;right:14px;bottom:12px;width:20px;height:20px;border-radius:50%;background:var(--acc);border:4px solid var(--bg2);animation:ping 2s infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes float{50%{transform:translateY(-7px)}}
+.name{margin:4px 0 2px;font-size:25px;font-weight:700;background:linear-gradient(90deg,#fff 0%,#bbf7d0 25%,#fff 50%,#99f6e4 75%,#fff 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 5s linear infinite, rise .8s ease both}
+.pos{font-family:var(--en);font-weight:600;font-size:14px;color:var(--gold);letter-spacing:.5px;white-space:nowrap;animation:rise .8s .15s ease both}
+.pos .bar{display:inline-block;vertical-align:middle;height:2px;width:0;background:linear-gradient(90deg,transparent,var(--gold));animation:grow 1.2s .5s ease forwards}
+.pos .bar.r{background:linear-gradient(90deg,var(--gold),transparent)}
+@keyframes grow{to{width:22px}}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.channel{display:inline-flex;align-items:center;gap:8px;margin:16px 0 12px;padding:7px 14px;border-radius:999px;background:rgba(255,0,0,.10);border:1px solid rgba(255,0,0,.25);font-family:var(--en);font-weight:700;text-decoration:none;animation:rise .8s .3s ease both;transition:transform .25s}
+.channel:hover{transform:scale(1.05)}
+.channel img{width:26px;height:26px;border-radius:50%;background:#fff}
+.links{list-style:none;padding:0;margin:4px 0 0;display:grid;gap:8px;text-align:left}
+.links a{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:13px;background:var(--card2);border:1px solid var(--line);text-decoration:none;font-family:var(--en);font-size:12.5px;word-break:break-all;transition:transform .25s,background .25s,border-color .25s;opacity:0;animation:slide .6s ease forwards}
+.links li:nth-child(1) a{animation-delay:.45s}.links li:nth-child(2) a{animation-delay:.6s}.links li:nth-child(3) a{animation-delay:.75s}.links li:nth-child(4) a{animation-delay:.9s}.links li:nth-child(5) a{animation-delay:1.05s}
+@keyframes slide{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+.links a:hover{transform:translateX(5px);background:rgba(255,255,255,.1);border-color:var(--c)}
+.links .ic{width:32px;height:32px;flex:none;border-radius:10px;display:grid;place-items:center;background:var(--c);transition:transform .4s}
+.links a:hover .ic{animation:wiggle .6s ease}
+@keyframes wiggle{25%{transform:rotate(-12deg) scale(1.1)}50%{transform:rotate(10deg) scale(1.1)}75%{transform:rotate(-5deg)}}
+.links svg{width:18px;height:18px;fill:#fff}
+.intro{padding:28px 30px;display:flex;flex-direction:column;justify-content:center}
+.intro h2{margin:0 0 6px;font-size:30px;line-height:1.3}
+.intro h2 b{color:var(--acc)}
+.intro p{color:var(--mut);margin:6px 0 16px;max-width:640px}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:6px}
+@media(max-width:700px){.flow{grid-template-columns:1fr 1fr}}
+.flow div{padding:14px;border-radius:16px;background:var(--card2);border:1px solid var(--line);font-size:13px;animation:rise .7s ease both}
+.flow div:nth-child(2){animation-delay:.1s}.flow div:nth-child(3){animation-delay:.2s}.flow div:nth-child(4){animation-delay:.3s}
+.flow i{font-style:normal;display:block;font-family:var(--en);font-weight:800;font-size:20px;color:var(--acc)}
+
+/* ---------- work area ---------- */
+.step{padding:22px;margin-bottom:18px}
+.step h3{margin:0 0 14px;font-size:18px;display:flex;align-items:center;gap:10px}
+.step h3 .n{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#04210f;font-family:var(--en);font-weight:800;font-size:14px}
+.drop{display:block;border:2px dashed rgba(34,197,94,.45);border-radius:18px;padding:34px 18px;text-align:center;cursor:pointer;transition:.25s;background:rgba(34,197,94,.04)}
+.drop:hover,.drop.over{background:rgba(34,197,94,.10);border-color:var(--acc);transform:scale(1.005)}
+.drop svg{width:46px;height:46px;stroke:var(--acc);animation:float 3s ease-in-out infinite}
+.drop b{display:block;font-size:17px;margin-top:6px}
+.drop small{color:var(--mut)}
+.files{display:grid;gap:8px;margin-top:14px}
+.file{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;background:var(--card2);border:1px solid var(--line);animation:rise .4s ease both}
+.file .fn{font-family:var(--en);font-size:13px;font-weight:600;word-break:break-all}
+.file .meta{color:var(--mut);font-size:12px}
+.file .x{margin-left:auto}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11.5px;font-family:var(--en);font-weight:600;background:rgba(255,255,255,.08);border:1px solid var(--line);margin:2px 3px 2px 0}
+.tag.g{background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.4);color:#86efac}
+.tag.b{background:rgba(96,165,250,.14);border-color:rgba(96,165,250,.4);color:#bfdbfe}
+.tag.r{background:rgba(248,113,113,.14);border-color:rgba(248,113,113,.4);color:#fecaca}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+label.f{display:block;font-size:12.5px;color:var(--mut)}
+label.f input,label.f select,input.in{width:100%;margin-top:4px;padding:9px 11px;border-radius:11px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--tx);outline:none;transition:border .2s,box-shadow .2s}
+label.f input:focus,input.in:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(34,197,94,.18)}
+.chk{display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer}
+.chk input{accent-color:var(--acc);width:16px;height:16px}
+.preview{margin-top:14px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#fff}
+.preview canvas{display:block;width:100%;height:auto}
+.btn{border:0;border-radius:12px;padding:9px 14px;cursor:pointer;color:var(--tx);background:var(--card2);border:1px solid var(--line);transition:.2s}
+.btn:hover{background:rgba(255,255,255,.12)}
+.btn.sm{padding:4px 9px;font-size:12px;border-radius:9px}
+.btn.pri{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#04210f;font-weight:700;border:0;font-size:16px;padding:14px 26px;box-shadow:0 10px 30px rgba(34,197,94,.3)}
+.btn.pri:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn.pri:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.block{border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;background:rgba(0,0,0,.15);animation:rise .4s ease both}
+.bh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.bh .code{font-family:var(--en);font-weight:800;font-size:16px}
+.bh .sp{flex:1}
+.part{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px 10px;border-radius:12px;background:var(--card);margin-top:7px;border:1px solid transparent}
+.part.off{opacity:.45}
+.part .info{font-size:12px;color:var(--mut)}
+.chips{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:5px;padding-top:6px}
+.chip{display:inline-flex;align-items:center;gap:3px;padding:2px 3px 2px 8px;border-radius:9px;background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.3);font-family:var(--en);font-size:11.5px}
+.chip.miss{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.5);animation:shake .5s}
+.chip.man{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.5)}
+.chip select{background:transparent;color:var(--tx);border:0;font-size:11.5px;font-family:var(--en);font-weight:700;cursor:pointer}
+.chip select option{background:#0c1528}
+@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 4px}
+@media(max-width:800px){.slots{grid-template-columns:1fr 1fr}}
+.slot{position:relative;border:1.5px dashed rgba(96,165,250,.45);border-radius:13px;padding:10px 12px;min-height:74px;cursor:pointer;transition:.2s;background:rgba(96,165,250,.05)}
+.slot:hover,.slot.over{background:rgba(96,165,250,.13);border-color:#60a5fa}
+.slot.full{border-style:solid;border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.08);cursor:default}
+.slot b{display:block;font-family:var(--en);font-size:13.5px}
+.slot small{display:block;color:var(--mut);font-size:11.5px;word-break:break-all;margin-top:2px}
+.slot .rm{position:absolute;top:6px;right:6px}
+.slotlab{font-size:12.5px;color:var(--mut);margin-top:8px}
+.gen{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.prog{flex:1;min-width:200px;height:10px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .3s}
+.log{margin-top:14px;font-size:13px;color:var(--mut);white-space:pre-wrap}
+.log .ok{color:#86efac}.log .bad{color:#fecaca}
+.empty{color:var(--mut);text-align:center;padding:18px;font-size:13.5px}
+footer.site{color:var(--mut);text-align:center;font-size:12.5px;padding:24px 0 34px}
+footer.site b{color:var(--tx)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <svg class="applogo" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22c55e"/><stop offset="1" stop-color="#0ea5a4"/></linearGradient></defs>
+      <rect width="64" height="64" rx="16" fill="url(#lg)"/>
+      <path d="M17 10h21l10 10v34H17z" fill="#fff"/><path d="M38 10v10h10" fill="#d1fae5"/>
+      <rect x="22" y="17" width="12" height="3" rx="1.5" fill="#86efac"/><rect x="22" y="23" width="9" height="3" rx="1.5" fill="#86efac"/>
+      <path class="chk" d="M23 37l6 6 12-14" stroke="#16a34a" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="32.5" y="52" text-anchor="middle" font-family="Poppins,Arial" font-weight="800" font-size="7.5" fill="#0f766e">TIS</text>
+    </svg>
+    <div class="brand">
+      <h1><span>TIS Solve Sheet Studio</span></h1>
+      <p>প্রশ্নপত্র থেকে এক ক্লিকে সলুশন বুক</p>
+    </div>
+    <div class="badge"><span class="dot"></span> সম্পূর্ণ অফলাইন · আপনার ফাইল কোথাও যায় না</div>
+  </header>
+
+  <section class="hero">
+    <aside class="glass profile">
+      <div class="ring"><img src="__PHOTO__" alt="তারিকুল ইসলাম (সুমন)"><span class="online"></span></div>
+      <h2 class="name">তারিকুল ইসলাম (সুমন)</h2>
+      <div class="pos"><span class="bar"></span>______Msc Mathematics______<span class="bar r"></span></div>
+      <a class="channel" href="https://www.youtube.com/@tis.academy24" target="_blank" rel="noopener"><img src="__LOGO__" alt="">TIS Academy</a>
+      <ul class="links">
+        <li><a href="https://www.youtube.com/@tis.academy24" target="_blank" rel="noopener" style="--c:#ff0033"><span class="ic"><svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6z"/></svg></span>https://www.youtube.com/@tis.academy24</a></li>
+        <li><a href="https://www.facebook.com/tariqul.islam.422531/" target="_blank" rel="noopener" style="--c:#1877f2"><span class="ic"><svg viewBox="0 0 24 24"><path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4h-3V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg></span>https://www.facebook.com/tariqul.islam.422531/</a></li>
+        <li><a href="https://wa.me/8801755489719" target="_blank" rel="noopener" style="--c:#25d366"><span class="ic"><svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 21.8c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7 1 1-3.6-.2-.4A9.8 9.8 0 1 1 12 21.8zm8.4-18.3A11.8 11.8 0 0 0 1.8 17.7L.1 24l6.4-1.7A11.8 11.8 0 0 0 23.8 12c0-3.2-1.2-6.1-3.4-8.5z"/></svg></span>https://wa.me/8801755489719</a></li>
+        <li><a href="https://github.com/tariqulislam4015" target="_blank" rel="noopener" style="--c:#6e5494"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 0-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.4-.5-1.6.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.6 18.3 5 18.3 5c.7 1.6.2 2.8.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg></span>https://github.com/tariqulislam4015</a></li>
+        <li><a href="https://www.linkedin.com/in/tariqul3315/" target="_blank" rel="noopener" style="--c:#0a66c2"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg></span>https://www.linkedin.com/in/tariqul3315/</a></li>
+      </ul>
+    </aside>
+    <div class="glass intro">
+      <h2>প্রশ্নের <b>.docx</b> দিন, পেয়ে যান সাজানো <b>Solution Book</b></h2>
+      <p>Weekly বা Daily — যে কয়টা Set-ই থাকুক, √ দেওয়া সঠিক option খুঁজে <b>[Ans: …]</b>-এ বসিয়ে দেয়, option গুলো ২ কলামে সাজায়, MCQ/Written Set অনুযায়ী banner দেয় এবং header ফাইলের নাম অনুযায়ী নিজে নিজে বদলে নেয়। Equation, ছবি, Bijoy/Unicode লেখা — সব হুবহু থাকে।</p>
+      <div class="flow">
+        <div><i>01</i>প্রশ্নের .docx ফাইল দিন (একাধিক)</div>
+        <div><i>02</i>Exam, Set ও উত্তর মিলিয়ে নিন</div>
+        <div><i>03</i>Header ও Layout ঠিক করুন</div>
+        <div><i>04</i>Solution Book .docx ডাউনলোড</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="glass step">
+    <h3><span class="n">1</span> প্রশ্নের ফাইল দিন</h3>
+    <label class="drop" id="drop">
+      <input type="file" id="fileIn" accept=".docx" multiple hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0-4 4m4-4 4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+      <b>.docx ফাইল এখানে টেনে আনুন বা ক্লিক করুন</b>
+      <small>যেমন: EAP_Weekly_MCQ_Exam_W-12-UniqueSet-1Bangla.docx, Daily MCQ P-01, Daily Written P-01 … একসাথে অনেকগুলো দেওয়া যাবে</small>
+    </label>
+    <div class="files" id="files"></div>
+  </section>
+
+  <section class="glass step">
+    <h3><span class="n">2</span> Exam, Set ও উত্তর</h3>
+    <div id="blocks"><div class="empty">ফাইল দিলে এখানে Exam গুলো আর প্রতিটি Set-এর উত্তর দেখা যাবে। লাল চিহ্নিত প্রশ্নে √ পাওয়া যায়নি — নিজে উত্তর বেছে দিতে পারবেন।</div></div>
+  </section>
+
+  <section class="glass step">
+    <h3><span class="n">3</span> Header, Footer ও Layout</h3>
+    <div class="grid2">
+      <label class="f">Header — বাম পাশের লেখা<input id="hLeft" data-k="hLeft"></label>
+      <label class="f">Header — ডান পাশের লেখা<input id="hRight" data-k="hRight"></label>
+      <label class="f">Output ফাইলের নাম<input id="outName" data-k="outName"></label>
+      <label class="f">Option দেখানোর ধরন
+        <select id="optMode"><option value="smart">শুধু Ans (কোনটিই নয় / উভয়ই থাকলে option রাখবে) — Main File-এর মতো</option><option value="grid">সব প্রশ্নে option রাখো (২ কলামে)</option><option value="list">সব প্রশ্নে option রাখো (প্রতি লাইনে একটা)</option><option value="none">কোনো option নয়, শুধু Ans</option></select></label>
+      <label class="f">Header রং
+        <select id="theme"><option value="gray">Classic Gray</option><option value="green">TIS Green</option><option value="blue">Royal Blue</option></select></label>
+    </div>
+    <div style="display:flex;gap:22px;flex-wrap:wrap;margin-top:14px">
+      <label class="chk"><input type="checkbox" id="keepSolve" checked> Solve / ব্যাখ্যা রাখুন</label>
+      <label class="chk"><input type="checkbox" id="newPage"> প্রতিটি Exam নতুন পেজে শুরু</label>
+    </div>
+    <div class="preview"><canvas id="cvH" width="2448" height="116"></canvas></div>
+    <div style="font-size:12.5px;color:var(--mut);margin-top:12px">Footer — মূল Solution Book-এর footer হুবহু থাকবে (পরিবর্তন হবে না):</div><div class="preview" style="margin-top:6px"><img id="ftrImg" style="display:block;width:100%" alt="footer"></div>
+  </section>
+
+  <section class="glass step">
+    <h3><span class="n">4</span> Solution Book তৈরি করুন</h3>
+    <div class="gen">
+      <button class="btn pri" id="genBtn" disabled>⚡ Solution Book বানাও</button>
+      <div class="prog"><i id="progBar"></i></div>
+    </div>
+    <div class="log" id="log"></div>
+  </section>
+
+  <footer class="site">Designed &amp; developed for <b>TIS Academy</b> by <b>তারিকুল ইসলাম (সুমন)</b> · Teach Idea For Success</footer>
+</div>
+
+<script>
+/*__ENGINE__*/
+const TPL = /*__TPL__*/null;
+const LOGO_SRC = "__LOGO__";
+
+/* ----------------- helpers ----------------- */
+const $ = s => document.querySelector(s);
+const bnD = s => String(s).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+const PROG_BN = { EAP: 'ইঞ্জিনিয়ারিং', MAP: 'মেডিকেল', VAP: 'ভার্সিটি', HSC: 'এইচএসসি' };
+const PROG_EN = { EAP: 'Engineering', MAP: 'Medical', VAP: 'Varsity', HSC: 'HSC' };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const state = { sources: [], blocks: [], dirty: {}, partEdits: {}, blockEdits: {} };
+const logoImg = new Image(); logoImg.src = LOGO_SRC;
+
+/* ----------------- file input ----------------- */
+const drop = $('#drop'), fileIn = $('#fileIn');
+['dragenter', 'dragover'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', ev => addFiles([...ev.dataTransfer.files]));
+fileIn.addEventListener('change', () => { const l = [...fileIn.files]; fileIn.value = ''; addFiles(l); });
+
+async function addFiles(list) {
+  for (const f of list) {
+    if (!/\.docx$/i.test(f.name)) { log(`⚠ ${f.name} — শুধু .docx ফাইল চলবে`, 'bad'); continue; }
+    try {
+      const src = await parseSource(f, state.sources.length);
+      state.sources.push(src);
+      log(`✓ ${f.name} — ${src.parts.length} টি অংশ পাওয়া গেছে`, 'ok');
+    } catch (e) { console.error(e); log(`✗ ${f.name} — ${e.message}`, 'bad'); }
+  }
+  rebuild();
+}
+async function addSlotFile(f, blk, L) {
+  if (!/\.docx$/i.test(f.name)) { log(`⚠ ${f.name} — শুধু .docx ফাইল চলবে`, 'bad'); return; }
+  try {
+    const idx = state.sources.length;
+    let src = await parseSource(f, idx);
+    if (!src.parts.some(p => p.kind === 'written')) src = await parseSource(f, idx, { forceWritten: true });
+    src.slot = { key: blk.key, set: L, kind: blk.kind, code: blk.code, num: blk.num, letter: blk.letter };
+    // an earlier part already holding this set in the block gets switched off
+    for (const p of blk.parts) if (p.kind === 'written' && p.set === L) (state.partEdits[p.id] ||= {}).enabled = false;
+    state.sources.push(src);
+    const n = src.parts.filter(p => p.kind === 'written').reduce((a, p) => a + p.questions.length, 0);
+    log(`✓ Written Set-${L} (${blk.code}) — ${f.name}: ${n} টি প্রশ্ন`, 'ok');
+  } catch (e) { console.error(e); log(`✗ ${f.name} — ${e.message}`, 'bad'); }
+  rebuild();
+}
+function removeSource(i) { state.sources[i] = null; rebuild(); }
+
+/* ----------------- grouping into exam blocks ----------------- */
+function rebuild() {
+  const map = new Map();
+  const live = state.sources.filter(Boolean);
+  for (const src of live) {
+    const m = src.slot ? { ...src.meta, kind: src.slot.kind, code: src.slot.code, num: src.slot.num, letter: src.slot.letter } : src.meta;
+    const key = m.kind + '|' + m.code;
+    if (!map.has(key)) map.set(key, { key, kind: m.kind, code: m.code, num: m.num, letter: m.letter, parts: [], order: map.size });
+    const blk = map.get(key);
+    let wIdx = 0;
+    if (src.slot) {
+      const wr = src.parts.filter(p => p.kind === 'written');
+      // all written parts of a slot file become that one set
+      if (wr.length > 1) { const first = wr[0]; for (const o of wr.slice(1)) first.questions.push(...o.questions); src.parts = [first]; }
+      else src.parts = wr;
+      for (const p of src.parts) { p.set = src.slot.set; p.defBanner = `Written : Set-${src.slot.set}`; blk.parts.push(p); }
+      continue;
+    }
+    for (const p of src.parts) {
+      if (p.kind === 'mcq') { p.set = p.set || 'A'; p.defBanner = `MCQ : Set-${p.set}`; }
+      else {
+        let L = p.set;
+        if (!L && src.meta.unique) L = String.fromCharCode(64 + src.meta.unique + wIdx);
+        if (!L && m.kind === 'Daily') p.defBanner = 'Written : Set-A,B,C,D';
+        if (!L) { const used = blk.parts.filter(x => x.kind === 'written').length; L = String.fromCharCode(65 + used); }
+        p.set = p.set || L; wIdx++;
+        p.defBanner = p.defBanner || `Written : Set-${L}`;
+      }
+      blk.parts.push(p);
+    }
+  }
+  const PRI = { P: 1, C: 2, M: 3, B: 4, Bio: 4, E: 5, ICT: 6, W: 9 };
+  state.blocks = [...map.values()].sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'Daily' ? -1 : 1) || (PRI[a.letter] || 7) - (PRI[b.letter] || 7) || a.num - b.num);
+  if (state.order) state.blocks.sort((a, b) => (state.order.indexOf(a.key) + 1 || 999) - (state.order.indexOf(b.key) + 1 || 999));
+  for (const blk of state.blocks) {
+    const be = state.blockEdits[blk.key] || {};
+    blk.titleMain = be.titleMain ?? `Daily MCQ & Written Exam ${blk.code}`;
+    blk.titleMcq = be.titleMcq ?? `Weekly MCQ Exam ${blk.code}`;
+    blk.titleWritten = be.titleWritten ?? `Weekly Written Exam ${blk.code}`;
+    // sort: MCQ by set, then written by set; disable duplicate MCQ sets
+    blk.parts.sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'mcq' ? -1 : 1) || String(a.set).localeCompare(String(b.set)) || a.fileIdx - b.fileIdx);
+    const seen = new Set();
+    for (const p of blk.parts) {
+      const pe = state.partEdits[p.id] || {};
+      const k = p.kind + p.set;
+      p.enabled = pe.enabled ?? !(p.kind === 'mcq' && seen.has(k));
+      seen.add(k);
+      p.banner = pe.banner ?? p.defBanner;
+    }
+  }
+  autoSettings();
+  renderFiles(); renderBlocks(); drawAll();
+  $('#genBtn').disabled = !state.blocks.length;
+}
+
+/* ----------------- settings ----------------- */
+const S_DEF = { hLeft: '', hRight: '', outName: 'Solution_Book.docx' };
+function autoSettings() {
+  const live = state.sources.filter(Boolean);
+  const m = live[0] ? live[0].meta : { prog: 'EAP', year: String(new Date().getFullYear()), ver: 'B.V' };
+  const wk = state.blocks.find(b => b.kind === 'Weekly') || state.blocks[0];
+  const num = wk ? wk.num : 1;
+  const bn = m.ver !== 'E.V';
+  const auto = {
+    hLeft: bn ? `${PROG_BN[m.prog] || ''} উইকলি সলুশন বুক-${bnD(m.year)}`.trim() : `${PROG_EN[m.prog] || m.prog} Weekly Solution Book-${m.year}`,
+    hRight: bn ? `উইকলি সলুশন বুক-${bnD(String(num).padStart(2, '0'))}` : `Weekly Solution Book-${String(num).padStart(2, '0')}`,
+    outName: `${m.prog}-${m.year}_Solution_Book_Week-${String(num).padStart(2, '0')}_${m.ver}.docx`,
+  };
+  for (const k of Object.keys(S_DEF)) { const el = $('#' + k); if (!state.dirty[k]) el.value = auto[k] ?? S_DEF[k]; }
+}
+document.querySelectorAll('[data-k]').forEach(el => el.addEventListener('input', () => { state.dirty[el.dataset.k] = true; drawAll(); }));
+$('#theme').addEventListener('change', drawAll);
+
+/* ----------------- renderers ----------------- */
+function renderFiles() {
+  const box = $('#files'); box.innerHTML = '';
+  state.sources.forEach((s, i) => {
+    if (!s) return;
+    const m = s.meta;
+    const mq = s.parts.filter(p => p.kind === 'mcq'), wq = s.parts.filter(p => p.kind === 'written');
+    const d = document.createElement('div'); d.className = 'file';
+    d.innerHTML = `<div><div class="fn">📄 ${esc(s.file.name)}</div><div class="meta">
+      <span class="tag g">${s.slot ? s.slot.kind + ' ' + s.slot.code + ' · Written Set-' + s.slot.set : m.kind + ' ' + m.code}</span><span class="tag">${m.prog}-${m.year}</span><span class="tag">${m.ver}</span>
+      ${mq.map(p => `<span class="tag b">MCQ Set-${p.set}: ${p.questions.length}টি</span>`).join('')}
+      ${wq.map(p => `<span class="tag b">Written${p.set ? ' Set-' + p.set : ''}: ${p.questions.length}টি</span>`).join('')}</div></div>
+      <button class="btn sm x" title="সরিয়ে দিন">✕</button>`;
+    d.querySelector('.x').onclick = () => removeSource(i);
+    box.appendChild(d);
+  });
+}
+function renderBlocks() {
+  const box = $('#blocks');
+  if (!state.blocks.length) { box.innerHTML = '<div class="empty">ফাইল দিলে এখানে Exam গুলো দেখা যাবে।</div>'; return; }
+  box.innerHTML = '';
+  state.blocks.forEach((blk, bi) => {
+    const el = document.createElement('div'); el.className = 'block';
+    const titles = blk.kind === 'Weekly'
+      ? `<div class="grid2" style="margin-bottom:6px"><label class="f">MCQ শিরোনাম<input class="in" data-t="titleMcq" value="${esc(blk.titleMcq)}"></label><label class="f">Written শিরোনাম<input class="in" data-t="titleWritten" value="${esc(blk.titleWritten)}"></label></div>`
+      : `<label class="f" style="margin-bottom:6px">শিরোনাম<input class="in" data-t="titleMain" value="${esc(blk.titleMain)}"></label>`;
+    el.innerHTML = `<div class="bh"><span class="tag g">${blk.kind}</span><span class="code">${esc(blk.code)}</span><span class="sp"></span>
+      <button class="btn sm" data-mv="-1" ${bi === 0 ? 'disabled' : ''}>▲</button><button class="btn sm" data-mv="1" ${bi === state.blocks.length - 1 ? 'disabled' : ''}>▼</button></div>${titles}`;
+    el.querySelectorAll('[data-t]').forEach(inp => inp.addEventListener('input', () => { (state.blockEdits[blk.key] ||= {})[inp.dataset.t] = inp.value; blk[inp.dataset.t] = inp.value; }));
+    el.querySelectorAll('[data-mv]').forEach(b => b.onclick = () => { const j = bi + +b.dataset.mv; [state.blocks[bi], state.blocks[j]] = [state.blocks[j], state.blocks[bi]]; state.order = state.blocks.map(x => x.key); renderBlocks(); });
+    // ---- Written Set-A..D input slots ----
+    const sl = document.createElement('div');
+    sl.innerHTML = `<div class="slotlab">Written — ৪টি Set-এর ফাইল (প্রতিটা ঘরে আলাদা .docx দিন বা টেনে আনুন)</div><div class="slots"></div>`;
+    const slots = sl.querySelector('.slots');
+    for (const L of ['A', 'B', 'C', 'D']) {
+      const part = blk.parts.find(p => p.kind === 'written' && p.set === L && p.enabled);
+      const d = document.createElement('div'); d.className = 'slot' + (part ? ' full' : '');
+      if (part) {
+        d.innerHTML = `<b>Written Set-${L} ✓</b><small>${part.questions.length} টি প্রশ্ন · ${esc(part.fileName)}</small><button class="btn sm rm" title="সরিয়ে দিন">✕</button>`;
+        d.querySelector('.rm').onclick = ev => { ev.stopPropagation(); const src = state.sources[part.fileIdx];
+          if (src && src.slot) state.sources[part.fileIdx] = null; else (state.partEdits[part.id] ||= {}).enabled = false; rebuild(); };
+      } else {
+        d.innerHTML = `<b>Written Set-${L}</b><small>+ ফাইল দিন</small>`;
+        const pick = () => { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.docx'; inp.onchange = () => inp.files[0] && addSlotFile(inp.files[0], blk, L); inp.click(); };
+        d.onclick = pick;
+        d.ondragover = ev => { ev.preventDefault(); d.classList.add('over'); };
+        d.ondragleave = () => d.classList.remove('over');
+        d.ondrop = ev => { ev.preventDefault(); d.classList.remove('over'); const f = ev.dataTransfer.files[0]; if (f) addSlotFile(f, blk, L); };
+      }
+      slots.appendChild(d);
+    }
+    el.appendChild(sl);
+    for (const p of blk.parts) {
+      const row = document.createElement('div'); row.className = 'part' + (p.enabled ? '' : ' off');
+      let info = `${p.questions.length} টি প্রশ্ন · ${esc(p.fileName)}`;
+      let chips = '';
+      if (p.kind === 'mcq') {
+        const miss = p.questions.filter(qn => !(p.answers[qn.num] || qn.auto)).length;
+        info += miss ? ` · <span style="color:var(--red)">${miss} টির উত্তর পাওয়া যায়নি</span>` : ' · <span style="color:#86efac">সব উত্তর পাওয়া গেছে ✓</span>';
+        chips = `<div class="chips">${p.questions.map(qn => {
+          const man = p.answers[qn.num]; const v = man || qn.auto || '';
+          const letters = (qn.opts && qn.opts.length ? qn.opts.map(o => o.letter) : ['a', 'b', 'c', 'd', 'e']);
+          const tip = (qn.preview || []).map(o => `(${o.letter}) ${o.text}`).join('\n');
+          return `<span class="chip ${!v ? 'miss' : man ? 'man' : ''}" title="${esc(tip)}">${String(qn.num).padStart(2, '0')}<select data-q="${qn.num}"><option value="">?</option>${letters.map(L => `<option ${L === v ? 'selected' : ''}>${L}</option>`).join('')}</select></span>`;
+        }).join('')}</div>`;
+      }
+      row.innerHTML = `<input type="checkbox" class="en" ${p.enabled ? 'checked' : ''} style="accent-color:var(--acc);width:17px;height:17px">
+        <div><input class="in bn" value="${esc(p.banner)}" style="margin:0 0 3px;padding:6px 10px;font-weight:600"><div class="info">${info}</div></div>
+        <span class="tag ${p.kind === 'mcq' ? 'b' : 'g'}">${p.kind === 'mcq' ? 'MCQ' : 'Written'}</span>${chips}`;
+      row.querySelector('.en').onchange = e => { p.enabled = e.target.checked; (state.partEdits[p.id] ||= {}).enabled = p.enabled; row.classList.toggle('off', !p.enabled); };
+      row.querySelector('.bn').oninput = e => { p.banner = e.target.value; (state.partEdits[p.id] ||= {}).banner = p.banner; };
+      row.querySelectorAll('select[data-q]').forEach(s => s.onchange = () => { const n = +s.dataset.q; const qn = p.questions.find(x => x.num === n); if (!s.value || s.value === qn.auto) delete p.answers[n]; else p.answers[n] = s.value; renderBlocks(); });
+      el.appendChild(row);
+    }
+    box.appendChild(el);
+  });
+}
+
+/* ----------------- header / footer artwork (canvas) ----------------- */
+const THEMES = {
+  gray: { band: '#E6E7E8', dark: '#939598', line: '#A7A9AC', mid: '#C7C8CA', gear: '#D9DADB', text: '#111111', acc: '#58595B' },
+  green: { band: '#E3F4E8', dark: '#3E8E50', line: '#7DBB8A', mid: '#B8DEC1', gear: '#CFEBD6', text: '#0E3B1A', acc: '#2F7A3F' },
+  blue: { band: '#E4ECF7', dark: '#2F5D9A', line: '#89A7CF', mid: '#BFD0E8', gear: '#D4E0F1', text: '#0E2547', acc: '#24497A' },
+};
+const BNF = "'Hind Siliguri','Noto Sans Bengali','Nirmala UI','Vrinda','SolaimanLipi',sans-serif";
+function gear(ctx, x, y, r, col) {
+  ctx.save(); ctx.translate(x, y); ctx.strokeStyle = col; ctx.lineWidth = r * 0.16; ctx.beginPath();
+  const n = 8; for (let i = 0; i < n * 2; i++) { const a = i * Math.PI / n; const rr = i % 2 ? r : r * 1.28; const a2 = a + Math.PI / n; ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); ctx.lineTo(Math.cos(a2 - .08) * rr, Math.sin(a2 - .08) * rr); }
+  ctx.closePath(); ctx.stroke(); ctx.beginPath(); ctx.arc(0, 0, r * .42, 0, 7); ctx.stroke(); ctx.restore();
+}
+function gearsBlock(ctx, x, w, h, T) { ctx.fillStyle = T.dark; ctx.fillRect(x, 0, w, h); const s = h / 116; gear(ctx, x + w * .38, h * .36, 15 * s, T.gear); gear(ctx, x + w * .25, h * .72, 13 * s, T.gear); gear(ctx, x + w * .58, h * .72, 13 * s, T.gear); }
+function chevrons(ctx, x, h, T) {
+  ctx.fillStyle = T.mid; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 60, 0); ctx.lineTo(x + 110, h / 2); ctx.lineTo(x + 60, h); ctx.lineTo(x, h); ctx.lineTo(x + 50, h / 2); ctx.fill();
+  ctx.fillStyle = T.line; ctx.beginPath(); ctx.moveTo(x + 120, 0); ctx.lineTo(x + 150, 0); ctx.lineTo(x + 200, h / 2); ctx.lineTo(x + 150, h); ctx.lineTo(x + 120, h); ctx.lineTo(x + 170, h / 2); ctx.fill();
+}
+function pane(ctx, x1, x2, h, T, leftArrow, rightArrow) {
+  const k = h * .35;
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = T.line; ctx.lineWidth = 3; ctx.beginPath();
+  ctx.moveTo(x1 + (leftArrow ? k : 0), 3); ctx.lineTo(x2 - (rightArrow ? k : 0), 3); ctx.lineTo(x2, h / 2); ctx.lineTo(x2 - (rightArrow ? k : 0), h - 3);
+  ctx.lineTo(x1 + (leftArrow ? k : 0), h - 3); ctx.lineTo(x1, h / 2); ctx.closePath(); ctx.fill(); ctx.stroke();
+}
+function fitFont(ctx, txt, weight, size, maxW, fam) { let s = size; do { ctx.font = `${weight} ${s}px ${fam}`; s -= 2; } while (ctx.measureText(txt).width > maxW && s > 14); return ctx.measureText(txt).width; }
+function drawHeader(cv) {
+  const T = THEMES[$('#theme').value], ctx = cv.getContext('2d'), W = cv.width, H = cv.height;
+  ctx.clearRect(0, 0, W, H); ctx.fillStyle = T.band; ctx.fillRect(0, 0, W, H);
+  gearsBlock(ctx, 0, 230, H, T); gearsBlock(ctx, W - 220, 220, H, T);
+  const L = $('#hLeft').value, R = $('#hRight').value;
+  const lw = fitFont(ctx, L, 700, 60, 980, BNF);
+  const x2 = Math.max(820, 230 + lw + 110);
+  pane(ctx, 230, x2, H, T, false, true);
+  ctx.fillStyle = T.text; ctx.textBaseline = 'middle'; ctx.fillText(L, 262, H / 2 + 3);
+  chevrons(ctx, x2 + 20, H, T);
+  const rx1 = Math.max(x2 + 250, 1400);
+  pane(ctx, rx1, W - 220, H, T, true, false);
+  const rw = fitFont(ctx, R, 700, 48, W - 220 - rx1 - 90, BNF);
+  ctx.fillStyle = T.acc; ctx.fillText(R, W - 220 - 40 - rw, H / 2 + 3);
+}
+function drawAll() { drawHeader($('#cvH')); }
+$('#ftrImg').src = 'data:image/png;base64,' + TPL.footerPng;
+(document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(drawAll);
+const canvasPng = cv => new Promise(res => cv.toBlob(async b => res({ bytes: new Uint8Array(await b.arrayBuffer()), w: cv.width, h: cv.height }), 'image/png'));
+
+/* ----------------- generate ----------------- */
+function log(msg, cls) { const l = $('#log'); const d = document.createElement('div'); if (cls) d.className = cls; d.textContent = msg; l.prepend(d); }
+$('#genBtn').onclick = async () => {
+  const btn = $('#genBtn'); btn.disabled = true; const bar = $('#progBar'); bar.style.width = '15%';
+  try {
+    drawAll();
+    const hp = await canvasPng($('#cvH'));
+    bar.style.width = '35%';
+    const settings = { optionsMode: $('#optMode').value, keepSolve: $('#keepSolve').checked, newPagePerExam: $('#newPage').checked, docTitle: $('#hRight').value, author: 'তারিকুল ইসলাম (সুমন) — TIS Academy' };
+    const res = await buildBook({ tpl: TPL, sources: state.sources.filter(Boolean).length === state.sources.length ? state.sources : state.sources.map(s => s || { rootAttrs: [] }), blocks: state.blocks, settings, headerPng: hp });
+    bar.style.width = '100%';
+    let name = $('#outName').value.trim() || 'Solution_Book.docx'; if (!/\.docx$/i.test(name)) name += '.docx';
+    const a = document.createElement('a'); a.href = URL.createObjectURL(res.blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+    if (res.missing.length) log(`⚠ উত্তর পাওয়া যায়নি (Ans ফাঁকা রইল): ${res.missing.join(', ')}`, 'bad');
+    res.warnings.forEach(w => log('⚠ ' + w, 'bad'));
+    log(`✓ তৈরি হয়েছে: ${name} — ${res.answered}/${res.total} MCQ-এর উত্তর বসানো হয়েছে (${(res.blob.size / 1024 / 1024).toFixed(2)} MB)`, 'ok');
+  } catch (e) { console.error(e); log('✗ সমস্যা: ' + e.message, 'bad'); bar.style.width = '0'; }
+  btn.disabled = false; setTimeout(() => bar.style.width = '0', 2500);
+};
+autoSettings(); drawAll();
+</script>
+</body>
+</html>

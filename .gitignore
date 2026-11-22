@@ -1,0 +1,8 @@
+# local test inputs / outputs — never commit exam papers
+*.docx
+*.pdf
+out/
+node_modules/
+__pycache__/
+.DS_Store
+Thumbs.db
