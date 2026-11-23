@@ -140,6 +140,67 @@ label.f input:focus,input.in:focus{border-color:var(--acc);box-shadow:0 0 0 3px 
 .empty{color:var(--mut);text-align:center;padding:18px;font-size:13.5px}
 footer.site{color:var(--mut);text-align:center;font-size:12.5px;padding:24px 0 34px}
 footer.site b{color:var(--tx)}
+/* ---------- partitions ---------- */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 18px}
+.mode{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:18px;padding:14px 18px;text-align:left;cursor:pointer;transition:.25s;display:flex;flex-direction:column;gap:2px}
+.mode b{font-size:16px}.mode small{color:var(--mut);font-size:12.5px}
+.mode:hover{background:var(--card2)}
+.mode.on{background:linear-gradient(135deg,rgba(34,197,94,.22),rgba(20,184,166,.16));border-color:rgba(34,197,94,.6);box-shadow:0 8px 26px rgba(34,197,94,.18)}
+.hint{font-weight:400;font-size:12.5px;color:var(--mut);margin-left:6px}
+.c5cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media(max-width:900px){.c5cols{grid-template-columns:1fr}}
+.c5grp,.c5set,.c5out{border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(0,0,0,.15)}
+.c5h{font-weight:700;font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.c5h .tag{margin-left:auto}
+.slot5{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;padding:7px 9px;border-radius:11px;margin-top:6px;border:1px dashed rgba(148,163,184,.3);background:rgba(255,255,255,.02);font-size:13px;transition:.2s}
+.slot5.full{border-style:solid;border-color:rgba(34,197,94,.45);background:rgba(34,197,94,.07);animation:rise .35s ease both}
+.slot5.empty{cursor:pointer;color:var(--mut)}
+.slot5.empty:hover,.slot5.over{background:rgba(96,165,250,.12);border-color:#60a5fa;color:var(--tx)}
+.slot5 .no{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.07);font-family:var(--en);font-weight:800}
+.slot5.full .no{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#04210f}
+.slot5 .fn{font-family:var(--en);font-size:12px;word-break:break-all}
+.slot5 .st{font-size:11.5px;color:var(--mut)}
+.slot5 .ctl{display:flex;gap:4px;align-items:center}
+.slot5 input.setl{width:44px;padding:3px 6px;border-radius:7px;border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--tx);font-family:var(--en);font-weight:700;text-align:center}
+.c5set .grid2{gap:9px}
+.c5set label.f{font-size:12px}
+.c5set label.f input,.c5set label.f select{padding:7px 9px;font-size:13px}
+.c5set .sub{margin:12px 0 4px;font-size:12.5px;font-weight:700;color:#bbf7d0}
+.pv{margin-top:8px;background:#fff;border-radius:10px;padding:8px;display:grid;gap:6px;justify-items:center}
+.pv canvas{max-width:100%;height:auto;display:block}
+.pv .row{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+.btn.pri.alt{background:linear-gradient(135deg,#60a5fa,#818cf8);color:#0b1020}
+.c5out .gen{gap:10px}
+.covers{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.covers img{width:100%;border-radius:8px;border:1px solid var(--line);background:#fff;aspect-ratio:8.5/11;object-fit:cover}
+/* ---------- print preview ---------- */
+#c5print{position:fixed;inset:0;z-index:50;background:#525659;overflow:auto}
+#c5print .ptools{position:sticky;top:0;z-index:2;display:flex;gap:10px;align-items:center;padding:10px 18px;background:#1f2937;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+#c5print .ptools .sp{flex:1}
+#pPages{padding:20px 0 40px}
+.c5page{position:relative;overflow:hidden;background:#fff;color:#000;margin:0 auto 18px;box-shadow:0 4px 18px rgba(0,0,0,.45);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.c5page .hbg,.c5page .fbg{position:absolute;left:0;width:100%}
+.c5page .htxt,.c5page .ftxt{position:absolute;left:0;width:100%}
+.c5page .htxt span,.c5page .ftxt span{position:absolute;top:50%;transform:translateY(-50%);white-space:nowrap;font-weight:700}
+.c5page .htxt .l{left:.8in;color:#fff}.c5page .htxt .r{right:.92in;color:#1a1a1a}
+.c5page .htxt.BV span{font-family:'SolaimanLipi','Hind Siliguri','Nirmala UI',sans-serif;font-size:12pt}
+.c5page .htxt.EV span{font-family:Arial,Helvetica,sans-serif;font-size:10pt}
+.c5page .ftxt .n{left:4.25in;transform:translate(-50%,-50%);font-family:'Times New Roman','SolaimanLipi',serif;font-weight:400;font-size:10pt}
+.c5page .ftxt .l{left:1.15in;color:#fff;font-size:9pt}.c5page .ftxt .r{right:.92in;font-size:9.5pt;font-family:'SolaimanLipi','Hind Siliguri',sans-serif}
+.c5body{position:absolute;color:#000;font-family:'Times New Roman','SolaimanLipi',serif;font-size:11pt;line-height:1.25}
+.c5body .p{margin:0;white-space:pre-wrap;overflow-wrap:break-word}
+.c5body .tab{display:inline-block}
+.c5body math{font-family:'Cambria Math','STIX Two Math','Latin Modern Math',math}
+.c5body table.tbl td .p{white-space:pre-wrap}
+@media print{
+  body.printing{background:#fff!important}
+  body.printing>*:not(#c5print){display:none!important}
+  body.printing #c5print{position:static;background:#fff;overflow:visible}
+  body.printing #c5print .ptools{display:none}
+  body.printing #pPages{padding:0}
+  body.printing .c5page{margin:0;box-shadow:none;page-break-after:always;break-after:page}
+  @page{size:letter;margin:0}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -187,6 +248,11 @@ footer.site b{color:var(--tx)}
     </div>
   </section>
 
+  <nav class="modes" id="modes">
+    <button class="mode on" data-mode="eap"><b>🎓 EAP Solution Book</b><small>Weekly / Daily · MCQ + Written</small></button>
+    <button class="mode" data-mode="c5"><b>📘 Class 5 Solve Sheet</b><small>প্রাথমিক বৃত্তি · BV ও EV আলাদা</small></button>
+  </nav>
+  <div id="modeEAP">
   <section class="glass step">
     <h3><span class="n">1</span> প্রশ্নের ফাইল দিন</h3>
     <label class="drop" id="drop">
@@ -230,12 +296,49 @@ footer.site b{color:var(--tx)}
     </div>
     <div class="log" id="log"></div>
   </section>
+  </div>
+  <div id="modeC5" hidden>
+    <section class="glass step">
+      <h3><span class="n">1</span> BV ও EV ফাইল দিন <small class="hint">প্রতিটি ফাইল = একটি Set · ক্রম অনুযায়ী Set-A, Set-B …</small></h3>
+      <label class="drop" id="c5drop">
+        <input type="file" id="c5In" accept=".docx" multiple hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0-4 4m4-4 4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+        <b>সব .docx একসাথে এখানে দিন — নাম/লেখা দেখে নিজে BV ও EV ভাগ করবে</b>
+        <small>যেমন: Class_5Math_Final_model_test_Britti_Exam_Set-_A_2026_BV.docx · …_EV_Set_B.docx (প্রতি গ্রুপে সর্বোচ্চ ১০টি)</small>
+      </label>
+      <div class="c5cols">
+        <div class="c5grp" id="grpBV"></div>
+        <div class="c5grp" id="grpEV"></div>
+      </div>
+    </section>
+    <section class="glass step">
+      <h3><span class="n">2</span> Header, Footer, Title ও Cover <small class="hint">সব লেখা বদলানো যায় · Word ফাইলেও header/footer-এর লেখা edit করা যাবে</small></h3>
+      <div class="c5cols">
+        <div class="c5set" id="setBV"></div>
+        <div class="c5set" id="setEV"></div>
+      </div>
+    </section>
+    <section class="glass step">
+      <h3><span class="n">3</span> Solve Sheet ডাউনলোড</h3>
+      <div class="c5cols">
+        <div class="c5out"><div class="c5h">BV (বাংলা ভার্সন)</div><div class="gen"><button class="btn pri" data-gen="BV:docx">⬇ Word (.docx)</button><button class="btn pri alt" data-gen="BV:pdf">🖨 PDF</button></div></div>
+        <div class="c5out"><div class="c5h">EV (English Version)</div><div class="gen"><button class="btn pri" data-gen="EV:docx">⬇ Word (.docx)</button><button class="btn pri alt" data-gen="EV:pdf">🖨 PDF</button></div></div>
+      </div>
+      <div class="log" id="c5log"></div>
+    </section>
+  </div>
+  <div id="c5print" hidden>
+    <div class="ptools"><b id="pInfo">প্রিভিউ</b><span class="sp"></span><button class="btn pri" id="pPrint">🖨 PDF হিসেবে সেভ করুন</button><button class="btn" id="pClose">✕ বন্ধ</button></div>
+    <div id="pPages"></div>
+  </div>
 
   <footer class="site">Designed &amp; developed for <b>TIS Academy</b> by <b>তারিকুল ইসলাম (সুমন)</b> · Teach Idea For Success</footer>
 </div>
 
 <script>
 /*__ENGINE__*/
+/*__C5ENGINE__*/
+/*__C5RENDER__*/
 const TPL = /*__TPL__*/null;
 const LOGO_SRC = "__LOGO__";
 
@@ -499,6 +602,8 @@ $('#genBtn').onclick = async () => {
   btn.disabled = false; setTimeout(() => bar.style.width = '0', 2500);
 };
 autoSettings(); drawAll();
+/*__C5ASSETS__*/
+/*__C5UI__*/
 </script>
 </body>
 </html>

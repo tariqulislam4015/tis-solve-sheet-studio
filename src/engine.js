@@ -382,9 +382,10 @@ class Builder {
       }
       if (isEl(el, NS.wp, 'docPr')) el.setAttribute('id', String(++this.docPr));
       if (el.namespaceURI === NS.v && el.getAttributeNS(NS.o, 'spid')) el.setAttributeNS(NS.o, 'o:spid', '_x0000_s' + (++this.spid));
-      if (isW(el, 'pStyle') && !this.styleIds.has(el.getAttributeNS(NS.w, 'val'))) el.remove();
-      if (isW(el, 'numPr') || isW(el, 'framePr')) el.remove();
-      if (isW(el, 'highlight')) el.remove();
+      if ((isW(el, 'pStyle') || isW(el, 'rStyle') || isW(el, 'tblStyle')) && !this.styleIds.has(el.getAttributeNS(NS.w, 'val'))) el.remove();
+      if (isW(el, 'numPr')) { if (this.numMap) { const id = kids(el).find(k => isW(k, 'numId')); const nv = id && this.numMap[src.fileIdx + ':' + id.getAttributeNS(NS.w, 'val')]; if (nv) id.setAttributeNS(NS.w, 'w:val', nv); else el.remove(); } else el.remove(); }
+      if (isW(el, 'framePr')) el.remove();
+      if (isW(el, 'highlight') && !this.keepHighlight) el.remove();
     }
     this.scale(node);
   }

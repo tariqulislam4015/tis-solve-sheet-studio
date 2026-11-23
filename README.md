@@ -30,6 +30,20 @@
 | 📄 **২ কলাম Layout** | Exam title box, Set banner, ২-কলাম পেজ, মূল Solution Book-এর footer |
 | 🔒 **Private** | সব কাজ আপনার ব্রাউজারেই হয় — কোনো ফাইল কোথাও upload হয় না |
 
+## 📘 Class 5 Solve Sheet (প্রাথমিক বৃত্তি)
+
+App-এর উপরে **📘 Class 5 Solve Sheet** অংশে যান:
+
+| | |
+|---|---|
+| 📂 **BV ও EV আলাদা গ্রুপ** | প্রতি গ্রুপে ফাইল ১ … ১০ পর্যন্ত ক্রমিক ঘর; সব ফাইল একসাথে দিলে নাম/লেখা দেখে নিজে BV-EV ভাগ করে |
+| ✂️ **নম্বর বণ্টন বাদ** | “নম্বর বণ্টন / Marks Distribution” অংশ মুছে দেয়; “১ নং প্রশ্নের উত্তর / Answers to question no. 1” → **নমুনা উত্তর / Sample Answer** ব্যানার |
+| 🏷️ **Set ব্যানার** | প্রতিটি ফাইলের আগে “Written Set-A/B…” (নাম থেকে Set নেয়, বদলানো যায়) |
+| ✏️ **Editable** | Header, Footer, Title ব্লক, ব্যানারের লেখা, Cover (নমুনার / নিজের ছবি / ছাড়া) — সব বদলানো যায়; Word-এ header/footer-এর লেখাও edit করা যায় |
+| ⬇️ **Word + PDF** | BV ও EV আলাদা আলাদা `.docx`; PDF-এর জন্য প্রিভিউ → **Save as PDF** |
+
+> PDF সবচেয়ে ভালো দেখায় Chrome/Edge-এ, কম্পিউটারে **SolaimanLipi** font থাকলে।
+
 ## 🚀 ব্যবহার (Usage)
 
 1. **[Live App](https://tariqulislam4015.github.io/tis-solve-sheet-studio/)** খুলুন — অথবা `index.html` ডাউনলোড করে Chrome/Edge-এ খুলুন (internet লাগবে না)।
@@ -56,8 +70,11 @@ EAP_Weekly_MCQ_Exam_W-12-UniqueSet-2Bangla.docx → Weekly W-12, Written Set-B
 ├── src/
 │   ├── index.src.html         ← UI (HTML/CSS/JS)
 │   ├── engine.js              ← docx parser + Solution Book builder (zip, OOXML)
+│   ├── c5engine.js            ← Class 5 Solve Sheet builder (BV / EV)
+│   ├── c5render.js            ← docx → paged HTML for PDF (MathML, EMF, tabs)
+│   ├── c5ui.js                ← Class 5 partition UI
 │   ├── template.json          ← title box, banner, styles, footer from the reference book
-│   └── assets/                ← photo.jpg, logo.jpg
+│   └── assets/                ← photo.jpg, logo.jpg, c5/ (covers, footers)
 └── tools/
     ├── build.py               ← src/ → index.html
     └── extract_template.py    ← rebuild template.json from a reference Solution Book
