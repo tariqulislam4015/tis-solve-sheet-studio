@@ -273,7 +273,8 @@ async function parseSource(file, fileIdx, opt = {}) {
   // drop empty parts, auto-assign letters
   const finalParts = parts.filter(p => p.questions.length);
   for (const p of finalParts) if (p.kind === 'mcq') analyzePart(p);
-  return { file, fileIdx, zip, doc, rels, ct, meta, parts: finalParts, rootAttrs: [...doc.documentElement.attributes].map(a => [a.name, a.value]) };
+  return { file, fileIdx, zip, doc, rels, ct, meta, parts: finalParts, rootAttrs: [...doc.documentElement.attributes].map(a => [a.name, a.value]),
+    styles: await zip.text('word/styles.xml'), numbering: await zip.text('word/numbering.xml'), fontTable: await zip.text('word/fontTable.xml'), theme: await zip.text('word/theme/theme1.xml'), settings: await zip.text('word/settings.xml') };
 }
 
 /* ---- MCQ analysis: options, correct answer ---- */

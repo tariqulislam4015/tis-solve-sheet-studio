@@ -3,7 +3,11 @@ const C5 = {
   MAINQ: /^[\s ]*([০-৯]{1,2}[\s ]*।|\d{1,2}[\s ]*\.(?!\d))/,
   ANS: /^[\s ]*([০-৯\d]+[\s ]*নং[\s ]*প্রশ্নের[\s ]*উত্তর|Answers?[\s ]+(?:to|of)[\s ]+(?:the[\s ]+)?question(?:[\s ]*no\.?)?[\s ]*\d+)[\s ]*[:：]?/i,
   MARK: /^[\s ]*(নম্বর[\s ]*ব[ণন]্টন|মান[\s ]*ব[ণন]্টন|Marks?[\s ]*Distribution)[\s ]*[:：]?/i,
-  STOP: /^[\s ]*(\((?:ক|খ|গ|ঘ|ঙ|a|b|c|d|e)\)|[০-৯]{1,2}[\s ]*।|[০-৯\d]+[\s ]*নং|Answers?[\s ]+(?:to|of))/i,
+  STOP: /^[\s ]*(\((?:ক|খ|গ|ঘ|ঙ|চ|ছ|জ|ঝ|ঞ|a|b|c|d|e|f|g|h|i|j)\)|[০-৯]{1,2}[\s ]*।|[০-৯\d]+[\s ]*নং|Answers?[\s ]+(?:to|of)|উত্তর[\s ]*[:：ঃ]|Answers?[\s ]*[:：])/i,
+  // '(ক) নং প্রশ্নের উত্তর:' / 'Answer to question no. (a):' — the label '(ক)' is kept in front of the answer
+  SUBANS: /^[\s ]*(\([ক-ঞa-j]\))[\s ]*নং[\s ]*প্রশ্নের[\s ]*উত্তর[\s ]*[:：ঃ]?|^[\s ]*Answers?[\s ]+(?:to|of)[\s ]+(?:the[\s ]+)?question[\s ]*(?:no\.?)?[\s ]*(\([a-j]\))[\s ]*[:：]?/i,
+  BAREANS: /^[\s ]*(উত্তর|Answers?)[\s ]*[:：ঃ][\s ]*$/i,
+  HEAD: /^[\s ]*(সংক্ষিপ্ত[\s -]*উত্তর[\s ]*প্রশ্ন|সৃজনশীল[\s ]*প্রশ্ন|বহুনির্বাচনি[\s ]*প্রশ্ন|Short[\s ]*Answer[\s ]*Questions?|Creative[\s ]*Questions?).{0,30}$/i,
 };
 
 function c5Meta(fileName, text) {
@@ -41,6 +45,15 @@ async function parseC5(file, fileIdx) {
   let start = items.findIndex(el => isW(el, 'p') && C5.MAINQ.test(plainText(el)));
   if (start < 0) start = 0;
   const ops = []; const st = { answers: 0, marks: 0, removed: 0 };
+  let needBanner = false, pendingLabel = null, lastMain = 0;
+  const applyLabel = p => {
+    const r = mk(p.ownerDocument, 'r');
+    const rp = pendingLabel.ref && kids(pendingLabel.ref).find(k => isW(k, 'rPr'));
+    if (rp) r.appendChild(rp.cloneNode(true));
+    const t = mk(p.ownerDocument, 't'); t.setAttribute('xml:space', 'preserve'); t.textContent = pendingLabel.text; r.appendChild(t);
+    const first = kids(p).find(k => !isW(k, 'pPr')); p.insertBefore(r, first || null);
+    pendingLabel = null;
+  };
   const isEmpty = el => isW(el, 'p') && !plainText(el).trim() && !hasDrawing(el) && !q(el, NS.m, 'oMath').length;
   for (let i = start; i < items.length; i++) {
     const el = items[i]; clean(el);
@@ -51,8 +64,19 @@ async function parseC5(file, fileIdx) {
         while (j < items.length) { const e = items[j]; const tt = plainText(e).trim(); if ((isW(e, 'p') && isEmpty(e)) || C5.STOP.test(tt) || C5.MARK.test(tt) || (C5.MAINQ.test(tt) && isW(e, 'p') && /^[\s ]*[০-৯]/.test(tt))) break; j++; }
         st.marks++; st.removed += j - i; i = j - 1; continue;
       }
+      if (C5.HEAD.test(t.trim())) { st.removed++; continue; }
+      { const mq = t.match(C5.MAINQ); if (mq) { const n = parseInt(mq[1].replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d)), 10); if (n === lastMain + 1) { needBanner = true; lastMain = n; } } }
+      const sm = runsText(el).match(C5.SUBANS);
+      if (sm) {
+        if (needBanner) { ops.push({ banner: 'answer' }); st.answers++; needBanner = false; }
+        pendingLabel = { text: (sm[1] || sm[2]) + ' ', ref: kids(el).find(k => isW(k, 'r')) };
+        deleteRange(el, 0, sm[0].length);
+        if (plainText(el).trim() || hasDrawing(el)) { applyLabel(el); ops.push({ el }); }
+        continue;
+      }
+      if (C5.BAREANS.test(t)) { ops.push({ banner: 'answer' }); st.answers++; needBanner = false; continue; }
       const am = runsText(el).match(C5.ANS) || t.match(C5.ANS);
-      if (am) {
+      if (am) { needBanner = false;
         st.answers++; ops.push({ banner: 'answer' });
         const rt = runsText(el); const m2 = rt.match(C5.ANS);
         if (m2) deleteRange(el, 0, m2[0].length);
@@ -60,6 +84,7 @@ async function parseC5(file, fileIdx) {
         continue;
       }
     }
+    if (pendingLabel && isW(el, 'p') && (plainText(el).trim() || hasDrawing(el))) applyLabel(el);
     ops.push({ el });
   }
   // drop trailing empties and collapse runs of 3+ empty paragraphs
@@ -141,11 +166,69 @@ function c5MergeNumbering(sources, B) {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n${rootOpen}${abs.map(ser).join('')}${nums.map(ser).join('')}</w:numbering>`;
 }
 
+
+/* ---------------- Class 8 MCQ: question + options in a cell, circled answer in a grey strip ---------------- */
+const C8_MCQ = { col: 5184, strip: 380, content: 5184 - 380 };
+function c8EnsureSpacing(p) {
+  const pp = getPPr(p);
+  if (!kids(pp).some(k => isW(k, 'spacing'))) setPPrChild(pp, mk(p.ownerDocument, 'spacing', { after: '0', line: '252', lineRule: 'auto' }));
+}
+async function emitC8Mcq(B, src, part, qn, S) {
+  const doc = src.doc; const clone = el => el.cloneNode(true);
+  let pre = qn.els, opts = [], post = [];
+  if (qn.opts && qn.opts.length) { pre = qn.els.slice(0, qn.optRange[0]); post = qn.els.slice(qn.optRange[1] + 1); opts = qn.opts; }
+  const letter = part.answers[qn.num] || qn.auto;
+  if (!letter) B.missing.push(`Set-${part.label || ''} প্রশ্ন ${String(qn.num).padStart(2, '0')}`);
+  const out1 = [], out2 = [];
+  let firstQ = true;
+  for (const el of pre) {
+    const p = clone(el);
+    if (isW(p, 'p')) {
+      const t = runsText(p); const am = /\[\s*Ans[^\]]*\]/i.exec(t); if (am) deleteRange(p, am.index, am.index + am[0].length);
+      const isQ = firstQ && QNUM_RE.test(runsText(p));
+      if (isQ) { setIndent(p, 360, 360); firstQ = false; const pp = getPPr(p); setPPrChild(pp, mk(doc, 'keepNext')); } else setIndent(p, 360, null);
+      c8EnsureSpacing(p);
+    }
+    await B.fixNode(src, p); out1.push(B.ser(p));
+  }
+  if (opts.length) {
+    const disp = opts.map(o => { const p = clone(o.para); stripLeading(p, /^[\s ]*[√✓✔][\s ]*/); stripLeading(p, /^[\s ]+/); trimTrailing(p); const len = plainText(p).length; return { p, len, draw: hasDrawing(p) }; });
+    const lines = [];
+    if (disp.length <= 4 && disp.every(d => d.len <= 10 && !d.draw)) lines.push({ items: disp, stops: [360, 1480, 2600, 3720] });
+    else for (let i = 0; i < disp.length;) { if (i + 1 < disp.length && disp[i].len <= 24 && disp[i + 1].len <= 24 && !disp[i].draw && !disp[i + 1].draw) { lines.push({ items: [disp[i], disp[i + 1]], stops: [360, 2600] }); i += 2; } else { lines.push({ items: [disp[i]], stops: [360] }); i++; } }
+    for (const ln of lines) {
+      const p = mk(doc, 'p'); const pp = mk(doc, 'pPr'); p.appendChild(pp);
+      setPPrChild(pp, mk(doc, 'keepLines'));
+      setTabs(p, ln.stops.map(x => ['left', x]));
+      setPPrChild(pp, mk(doc, 'spacing', { after: '0', line: '252', lineRule: 'auto' }));
+      setIndent(p, 360, 360);
+      for (const d of ln.items) { const r = mk(doc, 'r'); r.appendChild(mk(doc, 'tab')); p.appendChild(r); for (const n of contentNodes(d.p)) p.appendChild(n); }
+      await B.fixNode(src, p); out1.push(B.ser(p));
+    }
+  }
+  if (S.keepSolve !== false) for (const el of post) {
+    const p = clone(el);
+    if (isW(p, 'p')) { setIndent(p, 360, null); c8EnsureSpacing(p); }
+    await B.fixNode(src, p); out2.push(B.ser(p));
+  }
+  const glyph = letter ? String.fromCharCode(0x24D0 + letter.charCodeAt(0) - 97) : '';
+  const ensureP = arr => { if (!arr.length || /<\/w:tbl>$/.test(arr[arr.length - 1])) arr.push('<w:p><w:pPr><w:spacing w:after="0"/></w:pPr></w:p>'); return arr.join(''); };
+  const W1 = C8_MCQ.content, W2 = C8_MCQ.strip;
+  const strip = (inner, v) => `<w:tc><w:tcPr><w:tcW w:w="${W2}" w:type="dxa"/><w:shd w:val="clear" w:color="auto" w:fill="D9D9D9"/><w:vAlign w:val="${v}"/></w:tcPr><w:p><w:pPr><w:spacing w:before="0" w:after="20" w:line="240" w:lineRule="auto"/><w:ind w:left="0" w:right="0"/><w:jc w:val="center"/></w:pPr>${inner}</w:p></w:tc>`;
+  const letterRun = glyph ? `<w:r><w:rPr><w:rFonts w:ascii="Segoe UI Symbol" w:hAnsi="Segoe UI Symbol" w:cs="Segoe UI Symbol"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr><w:t>${glyph}</w:t></w:r>` : '';
+  const cell = (x) => `<w:tc><w:tcPr><w:tcW w:w="${W1}" w:type="dxa"/></w:tcPr>${x}</w:tc>`;
+  const none = 'w:val="none" w:sz="0" w:space="0" w:color="auto"';
+  let xml = `<w:tbl><w:tblPr><w:tblW w:w="${W1 + W2}" w:type="dxa"/><w:tblInd w:w="0" w:type="dxa"/><w:tblBorders><w:top ${none}/><w:left ${none}/><w:bottom ${none}/><w:right ${none}/><w:insideH ${none}/><w:insideV ${none}/></w:tblBorders><w:tblLayout w:type="fixed"/><w:tblCellMar><w:top w:w="20" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:bottom w:w="20" w:type="dxa"/><w:right w:w="60" w:type="dxa"/></w:tblCellMar><w:tblLook w:val="0000" w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="1" w:noVBand="1"/></w:tblPr><w:tblGrid><w:gridCol w:w="${W1}"/><w:gridCol w:w="${W2}"/></w:tblGrid>`;
+  xml += `<w:tr>${cell(ensureP(out1))}${strip(letterRun, 'bottom')}</w:tr>`;
+  if (out2.length) xml += `<w:tr>${cell(ensureP(out2))}${strip('', 'top')}</w:tr>`;
+  return xml + '</w:tbl>';
+}
+
 /* ---------------- main build ---------------- */
 async function buildC5({ sources, sets, S, img }) {
   // sources: parsed c5 sources in order; sets: [{src, label}] ; img: {headerBg, footerBg, title, ribbons:[], answer, coverFront, coverBack}
   if (!sets.length) throw new Error('কোনো ফাইল নেই');
-  const uniq = [...new Set(sets.map(s => s.src))];
+  const uniq = [...new Set([...sets.filter(s => s.kind !== 'mcq'), ...sets.filter(s => s.kind === 'mcq')].map(s => s.src))]; // written sources first: their styles are the base
   const first = uniq[0];
   const rootOpen = '<w:document ' + first.rootAttrs.map(([n, v]) => `${n}="${xesc(v)}"`).join(' ') + '>';
   const merged = c5MergeStyles(uniq);
@@ -163,7 +246,7 @@ async function buildC5({ sources, sets, S, img }) {
   // header/footer
   const hRid = 'rId1', fRid = 'rId2', h2Rid = 'rId3', f2Rid = 'rId4';
   const P = C5_PAGE;
-  const sectProps = (hdr, ftr, type, pgStart) => `<w:sectPr><w:headerReference w:type="default" r:id="${hdr}"/><w:footerReference w:type="default" r:id="${ftr}"/><w:type w:val="${type}"/><w:pgSz w:w="${P.w}" w:h="${P.h}" w:code="1"/><w:pgMar w:top="${P.top}" w:right="${P.right}" w:bottom="${P.bottom}" w:left="${P.left}" w:header="${P.header}" w:footer="${P.footer}" w:gutter="0"/>${pgStart ? '<w:pgNumType w:start="1"/>' : ''}<w:cols w:space="720"/><w:docGrid w:linePitch="360"/></w:sectPr>`;
+  const sectProps = (hdr, ftr, type, pgStart, cols = 1) => `<w:sectPr><w:headerReference w:type="default" r:id="${hdr}"/><w:footerReference w:type="default" r:id="${ftr}"/><w:type w:val="${type}"/><w:pgSz w:w="${P.w}" w:h="${P.h}" w:code="1"/><w:pgMar w:top="${P.top}" w:right="${P.right}" w:bottom="${P.bottom}" w:left="${P.left}" w:header="${P.header}" w:footer="${P.footer}" w:gutter="0"/>${pgStart ? '<w:pgNumType w:start="1"/>' : ''}${cols === 2 ? '<w:cols w:num="2" w:sep="1" w:space="432"/>' : '<w:cols w:space="720"/>'}<w:docGrid w:linePitch="360"/></w:sectPr>`;
   const sectPara = props => `<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="20" w:lineRule="exact"/><w:rPr><w:sz w:val="2"/></w:rPr>${props}</w:pPr></w:p>`;
   const body = [];
 
@@ -173,15 +256,28 @@ async function buildC5({ sources, sets, S, img }) {
     body.push(`<w:p><w:pPr><w:spacing w:after="0"/></w:pPr><w:r><w:rPr><w:noProof/></w:rPr>${c5Anchor(rid, 7772400, 10058400, 0, 0, 'TIS-C5-CoverFront')}</w:r></w:p>`);
     body.push(sectPara(sectProps(h2Rid, f2Rid, 'nextPage', false)));
   }
-  // title block
+  // content sections: 1 column for title / banners / written, 2 columns for MCQ
+  let curCols = 1, curType = img.coverFront ? 'nextPage' : 'continuous', firstContent = true;
+  const setCols = n => { if (n === curCols) return; body.push(sectPara(sectProps(hRid, fRid, curType, firstContent, curCols))); firstContent = false; curType = 'continuous'; curCols = n; };
   if (img.title) { const rid = addImg(img.title, 'c5_title'); const [cx, cy] = sizeW(img.title, 7.3); body.push(centerP(c5Inline(rid, cx, cy, 'TIS-C5-Title'), 60)); }
   const ansRid = img.answer ? addImg(img.answer, 'c5_answer') : null;
   const [acx, acy] = img.answer ? sizeW(img.answer, img.answerWidthIn || 1.15) : [0, 0];
-  let total = 0;
+  let total = 0, mcqTotal = 0, mcqAnswered = 0;
   for (let k = 0; k < sets.length; k++) {
-    const { src } = sets[k];
+    const set = sets[k]; const { src } = set;
     const rb = img.ribbons[k];
+    setCols(1);
     if (rb) { const rid = addImg(rb, 'c5_ribbon_' + k); const [cx, cy] = sizeW(rb, 1.35); body.push(centerP(c5Inline(rid, cx, cy, 'TIS-C5-Ribbon'), 120, k ? 160 : 40)); }
+    if (set.kind === 'mcq') {
+      setCols(2);
+      B.S.maxImgEmu = (C8_MCQ.content - 420) * 635;
+      for (const part of src.parts.filter(p => p.kind === 'mcq')) for (const qn of part.questions) {
+        const xml = await emitC8Mcq(B, src, part, qn, S);
+        body.push(xml); mcqTotal++; if (part.answers[qn.num] || qn.auto) mcqAnswered++;
+      }
+      B.S.maxImgEmu = 10800 * 635;
+      continue;
+    }
     for (const op of src.ops) {
       if (op.banner) { if (ansRid) body.push(centerP(c5Inline(ansRid, acx, acy, 'TIS-C5-Answer'), 80, 80)); total++; continue; }
       const c = op.el.cloneNode(true);
@@ -189,7 +285,7 @@ async function buildC5({ sources, sets, S, img }) {
       body.push(B.ser(c));
     }
   }
-  const contentProps = sectProps(hRid, fRid, 'nextPage', true);
+  const contentProps = sectProps(hRid, fRid, curType, firstContent, curCols);
   if (img.coverBack) {
     body.push(sectPara(contentProps));
     const rid = addImg(img.coverBack, 'c5_cover_back');
@@ -232,5 +328,5 @@ async function buildC5({ sources, sets, S, img }) {
   files.push({ name: 'word/_rels/document.xml.rels', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="${NS.rel}">${rels.join('')}</Relationships>` });
   for (const [n, d] of B.files) files.push({ name: n, data: d });
   const blob = await writeZip(files);
-  return { blob, answers: total, warnings: B.warn, files };
+  return { blob, answers: total, mcqTotal, mcqAnswered, missing: B.missing, warnings: B.warn, files };
 }

@@ -44,6 +44,17 @@ App-এর উপরে **📘 Class 5 Solve Sheet** অংশে যান:
 
 > PDF সবচেয়ে ভালো দেখায় Chrome/Edge-এ, কম্পিউটারে **SolaimanLipi** font থাকলে।
 
+## 📙 Class 8 Solve Sheet (জুনিয়র বৃত্তি)
+
+App-এর উপরে **📙 Class 8 Solve Sheet** অংশে যান — এর Header/Footer/Cover সেটিং Class 5 থেকে আলাদা:
+
+| | |
+|---|---|
+| 🔘 **MCQ (উপরে)** | UniqueSet-1 = Set-A, UniqueSet-2 = Set-B …; √ দেওয়া উত্তর খুঁজে ২ কলামে সাজায়, ডান পাশের ধূসর ফালিতে ⓐⓑⓒⓓ |
+| ✍️ **Written (নিচে)** | CQ Set-A, Set-B …; নম্বর বণ্টন বাদ, “উত্তর:” → নমুনা উত্তর, “(ক) নং প্রশ্নের উত্তর:” → (ক) |
+| 📂 **BV ও EV আলাদা** | প্রতিটির MCQ ও Written-এ ১…১০ ক্রমিক ঘর; একসাথে দিলে নাম দেখে নিজে ভাগ করে |
+| ⬇️ **Word + PDF** | Cover → Title → MCQ Set-A, B → Written Set-A, B → পেছনের Cover |
+
 ## 🚀 ব্যবহার (Usage)
 
 1. **[Live App](https://tariqulislam4015.github.io/tis-solve-sheet-studio/)** খুলুন — অথবা `index.html` ডাউনলোড করে Chrome/Edge-এ খুলুন (internet লাগবে না)।

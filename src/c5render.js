@@ -412,6 +412,32 @@ class DocxRenderer {
     });
     return blocks;
   }
+  /* a borderless table is cut into row blocks (and rows whose other cells are empty into per-paragraph blocks)
+     so the paginator can flow it across columns and pages like Word does */
+  async tableBlocks(tbl) {
+    const rows = kids(tbl).filter(k => isW(k, 'tr'));
+    const tblPr = kids(tbl).find(k => isW(k, 'tblPr'));
+    const hasBorder = tblPr && q(tblPr, NS.w, 'tblBorders').some(b => kids(b).some(x => !['nil', 'none'].includes(x.getAttributeNS(NS.w, 'val'))));
+    if (hasBorder || rows.length < 1 || q(tbl, NS.w, 'vMerge').length) return [await this.table(tbl)];
+    const out = [];
+    for (const tr of rows) {
+      const tcs = kids(tr).filter(k => isW(k, 'tc'));
+      const restEmpty = tcs.slice(1).every(tc => !plainText(tc).trim() && !hasDrawing(tc));
+      const items = kids(tcs[0] || tr).filter(k => isW(k, 'p') || isW(k, 'tbl'));
+      if (restEmpty && tcs.length && items.length > 1) {
+        for (const it of items) {
+          const t2 = tbl.cloneNode(false); for (const k of kids(tbl)) if (!isW(k, 'tr')) t2.appendChild(k.cloneNode(true));
+          const tr2 = tr.cloneNode(false); for (const k of kids(tr)) if (!isW(k, 'tc')) tr2.appendChild(k.cloneNode(true));
+          tcs.forEach((tc, ci) => { const c2 = tc.cloneNode(false); for (const k of kids(tc)) if (isW(k, 'tcPr')) c2.appendChild(k.cloneNode(true)); if (ci === 0) c2.appendChild(it.cloneNode(true)); else c2.appendChild(tc.ownerDocument.createElementNS(NS.w, 'w:p')); tr2.appendChild(c2); });
+          t2.appendChild(tr2); out.push(await this.table(t2));
+        }
+      } else {
+        const t2 = tbl.cloneNode(false); for (const k of kids(tbl)) if (!isW(k, 'tr')) t2.appendChild(k.cloneNode(true));
+        t2.appendChild(tr.cloneNode(true)); out.push(await this.table(t2));
+      }
+    }
+    return out;
+  }
   async table(tbl) {
     const t = document.createElement('table'); t.className = 'tbl';
     const tblPr = kids(tbl).find(k => isW(k, 'tblPr'));
@@ -420,6 +446,10 @@ class DocxRenderer {
     const bAny = el => el && q(el, NS.w, 'tblBorders').some(b => kids(b).some(x => !['nil', 'none'].includes(x.getAttributeNS(NS.w, 'val'))));
     const borders = bAny(tblPr) || bAny(sty);
     const grid = q(tbl, NS.w, 'gridCol').map(g => +g.getAttributeNS(NS.w, 'w') * TW2PX);
+    const cmEl = tblPr && kids(tblPr).find(k => isW(k, 'tblCellMar'));
+    const cmv = (n, d) => { const e = cmEl && kids(cmEl).find(k => isW(k, n)); return e ? +e.getAttributeNS(NS.w, 'w') * TW2PX : d; };
+    const cm = { t: cmv('top', 1), b: cmv('bottom', 1), l: cmv('left', 6), r: cmv('right', 6) };
+    t.style.tableLayout = 'fixed'; const tw = grid.reduce((a, b) => a + b, 0); if (tw) t.style.width = tw + 'px';
     const jc = tblPr && kids(tblPr).find(k => isW(k, 'jc'))?.getAttributeNS(NS.w, 'val');
     t.style.cssText = `border-collapse:collapse;${jc === 'center' ? 'margin:0 auto;' : ''}`;
     const rows = kids(tbl).filter(k => isW(k, 'tr'));
@@ -434,7 +464,8 @@ class DocxRenderer {
         const td = document.createElement('td'); if (span > 1) td.colSpan = span;
         if (vmEl) vm[col] = td; else vm[col] = null;
         const w = grid.slice(col, col + span).reduce((a, b) => a + b, 0); if (w) td.style.width = w + 'px';
-        td.style.cssText += `padding:1px 6px;vertical-align:${tcPr && kids(tcPr).find(k => isW(k, 'vAlign'))?.getAttributeNS(NS.w, 'val') === 'center' ? 'middle' : 'top'};${borders ? 'border:1px solid #000;' : ''}`;
+        const va = tcPr && kids(tcPr).find(k => isW(k, 'vAlign'))?.getAttributeNS(NS.w, 'val');
+        td.style.cssText += `padding:${cm.t}px ${cm.r}px ${cm.b}px ${cm.l}px;vertical-align:${va === 'center' ? 'middle' : va === 'bottom' ? 'bottom' : 'top'};${borders ? 'border:1px solid #000;' : ''}`;
         const shd = tcPr && kids(tcPr).find(k => isW(k, 'shd'))?.getAttributeNS(NS.w, 'fill'); if (shd && shd !== 'auto') td.style.background = '#' + shd;
         for (const c of kids(tc)) { if (isW(c, 'p')) for (const b of await this.para(c)) td.appendChild(b); else if (isW(c, 'tbl')) td.appendChild(await this.table(c)); }
         r.appendChild(td); col += span;
@@ -467,48 +498,92 @@ function layoutTabs(block) {
   }
 }
 
-/* build print-ready pages */
+/* build print-ready pages (1- and 2-column sections, covers, header/footer) */
 async function renderC5Pages(blob, opt) {
   const M = await DocxModel.open(blob);
   const R = new DocxRenderer(M);
   const body = M.doc.getElementsByTagNameNS(NS.w, 'body')[0];
   const root = opt.root; root.innerHTML = '';
   const P = C5_PAGE; const pageW = P.w * TW2PX, pageH = P.h * TW2PX, cw = (P.w - P.left - P.right) * TW2PX, ch = (P.h - P.top - P.bottom) * TW2PX;
-  const measure = document.createElement('div'); measure.className = 'c5body'; measure.style.cssText = `position:absolute;left:-20000px;top:0;width:${cw}px`;
+  const gap = 432 * TW2PX, colW = (cw - gap) / 2;
+  // 1) split body into sections
+  const secs = []; let cur = { items: [] };
+  const colsOf = sp => { const c = sp && kids(sp).find(k => isW(k, 'cols')); return c && +c.getAttributeNS(NS.w, 'num') === 2 ? 2 : 1; };
+  for (const el of kids(body)) {
+    if (isW(el, 'sectPr')) { cur.cols = colsOf(el); secs.push(cur); cur = null; break; }
+    const sp = isW(el, 'p') && kids(el).find(k => isW(k, 'pPr')) && kids(kids(el).find(k => isW(k, 'pPr'))).find(k => isW(k, 'sectPr'));
+    if (!(sp && !plainText(el).trim())) cur.items.push(el);
+    if (sp) { cur.cols = colsOf(sp); secs.push(cur); cur = { items: [] }; }
+  }
+  if (cur && cur.items.length) { cur.cols = 1; secs.push(cur); }
+  // 2) render + measure each block at its section width
+  const measure = document.createElement('div'); measure.style.cssText = 'position:absolute;left:-30000px;top:0';
   document.body.appendChild(measure);
   const blocks = [];
-  for (const el of kids(body)) {
-    if (isW(el, 'p')) {
-      const names = q(el, NS.wp, 'docPr').map(d => d.getAttribute('name'));
-      if (names.includes('TIS-C5-CoverFront') || names.includes('TIS-C5-CoverBack')) { blocks.push({ cover: names.includes('TIS-C5-CoverFront') ? 'front' : 'back' }); continue; }
-      const pp = kids(el).find(k => isW(k, 'pPr')); if (pp && kids(pp).some(k => isW(k, 'sectPr')) && !plainText(el).trim()) continue;
-      for (const b of await R.para(el)) { measure.appendChild(b); blocks.push({ el: b }); }
-    } else if (isW(el, 'tbl')) { const t = await R.table(el); measure.appendChild(t); blocks.push({ el: t }); }
+  for (const [si, sec] of secs.entries()) {
+    const box = document.createElement('div'); box.className = 'c5body'; box.style.cssText = `position:relative;width:${sec.cols === 2 ? colW : cw}px`; measure.appendChild(box);
+    for (const el of sec.items) {
+      if (isW(el, 'p')) {
+        const names = q(el, NS.wp, 'docPr').map(d => d.getAttribute('name'));
+        if (names.includes('TIS-C5-CoverFront') || names.includes('TIS-C5-CoverBack')) { blocks.push({ cover: names.includes('TIS-C5-CoverFront') ? 'front' : 'back', sec: si }); continue; }
+        for (const b of await R.para(el)) { box.appendChild(b); blocks.push({ el: b, sec: si, cols: sec.cols }); }
+      } else if (isW(el, 'tbl')) { for (const t of await R.tableBlocks(el)) { box.appendChild(t); blocks.push({ el: t, sec: si, cols: sec.cols }); } }
+    }
   }
-  // images must be loaded before measuring
   await Promise.all([...measure.querySelectorAll('img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
   if (document.fonts && document.fonts.ready) await document.fonts.ready;
   for (const b of blocks) if (b.el) { layoutTabs(b.el); b.el.querySelectorAll('.p').forEach(layoutTabs); }
   for (const b of blocks) if (b.el) b.h = b.el.getBoundingClientRect().height;
-  // paginate
-  const pages = []; let cur = null, used = 0, pageNo = 0;
+  // 3) paginate
+  const pages = []; let page = null, y = 0, pageNo = 0;
   const newPage = (kind) => {
     const pg = document.createElement('div'); pg.className = 'c5page'; pg.style.cssText = `width:${pageW}px;height:${pageH}px`;
     if (kind === 'content') {
       pageNo++;
       pg.innerHTML = `<img class="hbg" src="${opt.headerUrl}" style="top:${0.5 * 96}px"><div class="htxt ${opt.lang}" style="top:${0.5 * 96}px;height:${opt.headerH}px"><span class="l" style="font-size:${(opt.S.hSzL || 24) / 2}pt">${esc(opt.S.hLeft)}</span><span class="r" style="font-size:${(opt.S.hSzR || 24) / 2}pt">${esc(opt.S.hRight)}</span></div>
         <img class="fbg" src="${opt.footerUrl}" style="top:${10.24 * 96}px"><div class="ftxt ${opt.lang} ${opt.S.footerMode}" style="top:${10.24 * 96}px;height:${opt.footerH}px">${opt.S.footerMode === 'custom' ? `<span class="l">${esc(opt.S.fLeft)}</span><span class="r">${esc(opt.S.fRight)}</span>` : ''}<span class="n">${opt.lang === 'BV' ? bnDigits(pageNo) : pageNo}</span></div>`;
-      const bd = document.createElement('div'); bd.className = 'c5body'; bd.style.cssText = `left:${P.left * TW2PX}px;top:${P.top * TW2PX}px;width:${cw}px`; pg.appendChild(bd); pg._body = bd;
+      const bd = document.createElement('div'); bd.className = 'c5body'; bd.style.cssText = `left:${P.left * TW2PX}px;top:${P.top * TW2PX}px;width:${cw}px;height:${ch}px`; pg.appendChild(bd); pg._body = bd;
     }
-    root.appendChild(pg); pages.push(pg); return pg;
+    root.appendChild(pg); pages.push(pg); page = kind === 'content' ? pg : null; y = 0; return pg;
   };
-  for (let i = 0; i < blocks.length; i++) {
+  const ensurePage = () => { if (!page) newPage('content'); };
+  const place = (el, top, left, width) => { el.style.position = 'absolute'; el.style.top = top + 'px'; el.style.left = left + 'px'; el.style.width = width + 'px'; page._body.appendChild(el); };
+  let i = 0;
+  while (i < blocks.length) {
     const b = blocks[i];
-    if (b.cover) { const pg = newPage('cover'); const src = b.cover === 'front' ? opt.coverFrontUrl : opt.coverBackUrl; if (src) pg.innerHTML = `<img src="${src}" style="width:100%;height:100%;display:block">`; cur = null; continue; }
-    let need = b.h;
-    if (b.el.dataset.keep && blocks[i + 1] && blocks[i + 1].el) need += Math.min(blocks[i + 1].h, ch / 3);
-    if (!cur || (used + need > ch && used > 0)) { cur = newPage('content'); used = 0; }
-    cur._body.appendChild(b.el); used += b.h;
+    if (b.cover) { const pg = newPage('cover'); const src = b.cover === 'front' ? opt.coverFrontUrl : opt.coverBackUrl; if (src) pg.innerHTML = `<img src="${src}" style="width:100%;height:100%;display:block">`; i++; continue; }
+    if (b.cols !== 2) {
+      ensurePage();
+      let need = b.h; if (b.el.dataset.keep && blocks[i + 1] && blocks[i + 1].el) need += Math.min(blocks[i + 1].h, ch / 3);
+      if (y + need > ch && y > 0) newPage('content');
+      place(b.el, y, 0, cw); y += b.h; i++; continue;
+    }
+    // a run of 2-column blocks belonging to one section
+    const run = []; const sec = b.sec; while (i < blocks.length && blocks[i].sec === sec && blocks[i].el) run.push(blocks[i++]);
+    let k = 0;
+    while (k < run.length) {
+      ensurePage(); if (ch - y < 60) newPage('content');
+      const avail = ch - y;
+      // fill both columns of this page
+      const cols = [[], []]; let c = 0, hgt = [0, 0];
+      while (k < run.length && c < 2) {
+        const h = run[k].h;
+        if (hgt[c] + h > avail && hgt[c] > 0) { c++; continue; }
+        cols[c].push(run[k]); hgt[c] += h; k++;
+      }
+      const last = k >= run.length;
+      let list = [...cols[0], ...cols[1]], split = cols[0].length;
+      if (last) { // balance the final columns like Word does before a continuous break
+        const tot = list.reduce((a, x) => a + x.h, 0); let acc = 0, best = list.length, bestH = Infinity;
+        for (let s = 0; s <= list.length; s++) { const left = acc, right = tot - acc; const m = Math.max(left, right); if (m < bestH && left <= avail && right <= avail) { bestH = m; best = s; } if (s < list.length) acc += list[s].h; }
+        split = best;
+      }
+      let h1 = 0, h2 = 0;
+      list.forEach((x, n) => { if (n < split) { place(x.el, y + h1, 0, colW); h1 += x.h; } else { place(x.el, y + h2, colW + gap, colW); h2 += x.h; } });
+      const regionH = last ? Math.max(h1, h2) : avail;
+      const sep = document.createElement('div'); sep.style.cssText = `position:absolute;left:${colW + gap / 2}px;top:${y}px;width:0;height:${regionH}px;border-left:1px solid #000`; page._body.appendChild(sep);
+      if (last) y += regionH; else newPage('content');
+    }
   }
   measure.remove();
   return { pages: pages.length };
