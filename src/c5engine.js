@@ -1,7 +1,7 @@
 /* ===================== Class 5 (Primary Scholarship) Solve Sheet engine ===================== */
 const C5 = {
   MAINQ: /^[\s ]*([০-৯]{1,2}[\s ]*।|\d{1,2}[\s ]*\.(?!\d))/,
-  ANS: /^[\s ]*([০-৯\d]+[\s ]*নং[\s ]*প্রশ্নের[\s ]*উত্তর|Answers?[\s ]+(?:to|of)[\s ]+(?:the[\s ]+)?question(?:[\s ]*no\.?)?[\s ]*\d+)[\s ]*[:：]?/i,
+  ANS: /^[\s ]*([০-৯\d]+[\s ]*নং[\s ]*প্রশ্নের[\s ]*উত্তর|Answers?[\s ]+(?:to|of)[\s ]+(?:the[\s ]+)?question(?:[\s ]*no\.?)?[\s ]*\(?\d+\)?)[\s ]*[:：]?/i,
   MARK: /^[\s ]*(নম্বর[\s ]*ব[ণন]্টন|মান[\s ]*ব[ণন]্টন|Marks?[\s ]*Distribution)[\s ]*[:：]?/i,
   STOP: /^[\s ]*(\((?:ক|খ|গ|ঘ|ঙ|চ|ছ|জ|ঝ|ঞ|a|b|c|d|e|f|g|h|i|j)\)|[০-৯]{1,2}[\s ]*।|[০-৯\d]+[\s ]*নং|Answers?[\s ]+(?:to|of)|উত্তর[\s ]*[:：ঃ]|Answers?[\s ]*[:：])/i,
   // '(ক) নং প্রশ্নের উত্তর:' / 'Answer to question no. (a):' — the label '(ক)' is kept in front of the answer
@@ -45,7 +45,9 @@ async function parseC5(file, fileIdx) {
   let start = items.findIndex(el => isW(el, 'p') && C5.MAINQ.test(plainText(el)));
   if (start < 0) start = 0;
   const ops = []; const st = { answers: 0, marks: 0, removed: 0 };
-  let needBanner = false, pendingLabel = null, lastMain = 0;
+  let needBanner = false, pendingLabel = null, lastMain = 0, zone = 'q', curMain = '', pendingMain = null;
+  const enterAnswers = () => { if (zone !== 'a') { zone = 'a'; pendingMain = curMain; } };
+  const pushEl = el => { const o = { el, zone }; if (zone === 'a' && pendingMain && isW(el, 'p') && (plainText(el).trim() || hasDrawing(el))) { o.mainPrefix = pendingMain; pendingMain = null; } ops.push(o); };
   const applyLabel = p => {
     const r = mk(p.ownerDocument, 'r');
     const rp = pendingLabel.ref && kids(pendingLabel.ref).find(k => isW(k, 'rPr'));
@@ -65,27 +67,28 @@ async function parseC5(file, fileIdx) {
         st.marks++; st.removed += j - i; i = j - 1; continue;
       }
       if (C5.HEAD.test(t.trim())) { st.removed++; continue; }
-      { const mq = t.match(C5.MAINQ); if (mq) { const n = parseInt(mq[1].replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d)), 10); if (n === lastMain + 1) { needBanner = true; lastMain = n; } } }
+      { const mq = t.match(C5.MAINQ); if (mq) { const n = parseInt(mq[1].replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d)), 10); if (n === lastMain + 1) { needBanner = true; lastMain = n; zone = 'q'; curMain = mq[0].trim(); pendingMain = null; } } }
       const sm = runsText(el).match(C5.SUBANS);
       if (sm) {
         if (needBanner) { ops.push({ banner: 'answer' }); st.answers++; needBanner = false; }
+        enterAnswers();
         pendingLabel = { text: (sm[1] || sm[2]) + ' ', ref: kids(el).find(k => isW(k, 'r')) };
         deleteRange(el, 0, sm[0].length);
-        if (plainText(el).trim() || hasDrawing(el)) { applyLabel(el); ops.push({ el }); }
+        if (plainText(el).trim() || hasDrawing(el)) { applyLabel(el); pushEl(el); }
         continue;
       }
-      if (C5.BAREANS.test(t)) { ops.push({ banner: 'answer' }); st.answers++; needBanner = false; continue; }
+      if (C5.BAREANS.test(t)) { ops.push({ banner: 'answer' }); st.answers++; needBanner = false; enterAnswers(); continue; }
       const am = runsText(el).match(C5.ANS) || t.match(C5.ANS);
       if (am) { needBanner = false;
-        st.answers++; ops.push({ banner: 'answer' });
+        st.answers++; ops.push({ banner: 'answer' }); enterAnswers();
         const rt = runsText(el); const m2 = rt.match(C5.ANS);
         if (m2) deleteRange(el, 0, m2[0].length);
-        if (plainText(el).trim() || hasDrawing(el)) ops.push({ el });
+        if (plainText(el).trim() || hasDrawing(el)) pushEl(el);
         continue;
       }
     }
     if (pendingLabel && isW(el, 'p') && (plainText(el).trim() || hasDrawing(el))) applyLabel(el);
-    ops.push({ el });
+    pushEl(el);
   }
   // drop trailing empties and collapse runs of 3+ empty paragraphs
   while (ops.length && ops[ops.length - 1].el && isEmpty(ops[ops.length - 1].el)) ops.pop();
@@ -276,6 +279,35 @@ async function buildC5({ sources, sets, S, img }) {
         body.push(xml); mcqTotal++; if (part.answers[qn.num] || qn.auto) mcqAnswered++;
       }
       B.S.maxImgEmu = 10800 * 635;
+      continue;
+    }
+    if (set.kind === 'cadet') {
+      // all questions (2 columns) → one answer banner → all answers (2 columns), each answer group opened with its question number
+      const emit = async (op) => {
+        const c = op.el.cloneNode(true);
+        if (op.mainPrefix && isW(c, 'p')) {
+          const d = c.ownerDocument; const r = mk(d, 'r'); const ref = kids(c).find(k => isW(k, 'r'));
+          const rp = ref && kids(ref).find(k => isW(k, 'rPr')); if (rp) r.appendChild(rp.cloneNode(true));
+          const t = mk(d, 't'); t.setAttribute('xml:space', 'preserve'); t.textContent = op.mainPrefix + ' '; r.appendChild(t);
+          c.insertBefore(r, kids(c).find(k => !isW(k, 'pPr')) || null);
+        }
+        // source tab stops are laid out for the full page width: squeeze them into one column
+        const colTw = C8_MCQ.col, f = colTw / 10800;
+        for (const t of q(c, NS.w, 'tab')) {
+          if (!t.parentNode || !isW(t.parentNode, 'tabs')) continue;
+          const pos = +t.getAttributeNS(NS.w, 'pos'); if (!(pos > 1100)) continue;
+          if (pos >= 9000 || t.getAttributeNS(NS.w, 'val') === 'right') { t.setAttributeNS(NS.w, 'w:pos', String(colTw)); t.setAttributeNS(NS.w, 'w:val', 'right'); }
+          else t.setAttributeNS(NS.w, 'w:pos', String(Math.round(pos * f)));
+        }
+        for (const ind of q(c, NS.w, 'ind')) for (const a of ['left', 'right', 'start', 'end']) { const v = +ind.getAttributeNS(NS.w, a); if (v > 1440) ind.setAttributeNS(NS.w, 'w:' + a, String(Math.round(v * f))); }
+        await B.fixNode(src, c); body.push(B.ser(c));
+      };
+      const oldImg = B.S.maxImgEmu, oldCol = B.S.colTwips;
+      B.S.maxImgEmu = (C8_MCQ.col - 200) * 635; B.S.colTwips = C8_MCQ.col;
+      setCols(2); for (const op of src.ops) if (!op.banner && op.zone !== 'a') await emit(op);
+      setCols(1); if (ansRid) body.push(centerP(c5Inline(ansRid, acx, acy, 'TIS-C5-Answer'), 80, 120)); total++;
+      setCols(2); for (const op of src.ops) if (!op.banner && op.zone === 'a') await emit(op);
+      B.S.maxImgEmu = oldImg; B.S.colTwips = oldCol;
       continue;
     }
     for (const op of src.ops) {

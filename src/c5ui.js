@@ -9,7 +9,7 @@
   document.querySelectorAll('.mode').forEach(b => b.onclick = () => {
     document.querySelectorAll('.mode').forEach(x => x.classList.toggle('on', x === b));
     const m = b.dataset.mode;
-    $('#modeEAP').hidden = m !== 'eap'; $('#modeC5').hidden = m !== 'c5'; $('#modeC8').hidden = m !== 'c8';
+    $('#modeEAP').hidden = m !== 'eap'; $('#modeC5').hidden = m !== 'c5'; $('#modeC8').hidden = m !== 'c8'; $('#modeCD').hidden = m !== 'cd';
     if (parts[m]) parts[m].drawPreviews();
   });
 
@@ -164,7 +164,7 @@
         const F = (k, label) => `<label class="f">${label}<input data-k="${k}" value="${esc(S[k] ?? '')}"></label>`;
         box.innerHTML = `<div class="c5h">${lang === 'BV' ? '📗 BV সেটিং' : '📘 EV Settings'}<button class="btn sm" data-reset style="margin-left:auto">↺ ডিফল্ট</button></div>
           <div class="sub">Header</div><div class="grid2">${F('hLeft', 'বাম পাশের লেখা')}${F('hRight', 'ডান পাশের লেখা')}</div>
-          <div class="sub">Title ব্লক ও ব্যানার</div><div class="grid2">${F('b1', 'গোল ব্যাজ — লাইন ১')}${F('b2', 'গোল ব্যাজ — লাইন ২')}${F('b3', 'গোল ব্যাজ — লাইন ৩')}${F('title', 'শিরোনাম')}
+          <div class="sub">Title ব্লক ও ব্যানার</div><div class="grid2">${F('b1', 'গোল ব্যাজ — লাইন ১')}${F('b2', 'গোল ব্যাজ — লাইন ২')}${F('b3', 'গোল ব্যাজ — লাইন ৩')}${F('b4', 'গোল ব্যাজ — লাইন ৪ (ঐচ্ছিক)')}${F('title', 'শিরোনাম')}
             ${hasMcq ? F('ribMcq', 'MCQ Set ব্যানারের উপরের লেখা') : ''}${F('ribTop', 'Written Set ব্যানারের উপরের লেখা')}${F('ans', 'উত্তরের ব্যানার')}</div>
           <div class="pv"><canvas data-pv="title"></canvas><div class="row">${hasMcq ? '<canvas data-pv="ribbonM"></canvas>' : ''}<canvas data-pv="ribbon"></canvas><canvas data-pv="answer"></canvas></div></div>
           <div class="sub">Footer</div>
@@ -227,8 +227,9 @@
       ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(cx + 8, cy, R - 4, 0, 7); ctx.fill();
       ctx.fillStyle = G.dark; ctx.beginPath(); ctx.arc(cx + 12, cy, R - 16, 0, 7); ctx.fill();
       ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
-      const fs = lang === 'BV' ? 58 : 46;
-      [S.b1, S.b2, S.b3].forEach((t, i) => { fit(ctx, t, 700, fs, 2 * (R - 34), FNT(lang)); ctx.fillText(t, cx + 12, cy + (i - 1) * (fs * 1.12)); });
+      const lines = [S.b1, S.b2, S.b3, S.b4].filter(x => x && x.trim());
+      const fs = (lang === 'BV' ? 58 : 46) * (lines.length > 3 ? 0.82 : 1);
+      lines.forEach((t, i) => { fit(ctx, t, 700, fs, 2 * (R - 34) - (lines.length > 3 && (i === 0 || i === lines.length - 1) ? 30 : 0), FNT(lang)); ctx.fillText(t, cx + 12, cy + (i - (lines.length - 1) / 2) * (fs * 1.1)); });
       ctx.textAlign = 'left';
     }
     function drawRibbon(cv, top, label) {
@@ -343,6 +344,18 @@
     DEF: {
       BV: { hLeft: 'জুনিয়র বৃত্তি প্রশ্নব্যাংক ও মডেল টেস্ট-২০২৬', hRight: 'সলভ শীট: ফাইনাল মডেল টেস্ট-গণিত', b1: 'জুনিয়র', b2: 'বৃত্তি পরীক্ষা', b3: '২০২৬', title: 'সলভ শীট: ফাইনাল মডেল টেস্ট-গণিত', ribMcq: 'MCQ', ribTop: 'Written', ans: 'নমুনা উত্তর', footerMode: 'original', fLeft: 'উদ্ভাস একাডেমিক এন্ড এডমিশন কেয়ার', fRight: 'পরিবর্তনের প্রত্যয়ে নিরন্তর পথচলা...', coverF: 'default', coverB: 'default', out: 'JEC_Final_MT_Math_BV.docx' },
       EV: { hLeft: 'Junior Scholarship Question Bank & Model Test-2026', hRight: 'Solve Sheet: Final Model Test-Math', b1: 'Junior', b2: 'Scholarship', b3: 'Exam-2026', title: 'Solve Sheet: Final Model Test-Math', ribMcq: 'MCQ', ribTop: 'Written', ans: 'Sample Answer', footerMode: 'original', fLeft: 'UDVASH Academic & Admission Care', fRight: 'পরিবর্তনের প্রত্যয়ে নিরন্তর পথচলা...', coverF: 'default', coverB: 'default', out: 'JEC_Final_MT_Math_EV.docx' },
+    },
+  });
+  /* ---------- Cadet ---------- */
+  parts.cd = SolvePartition({
+    id: 'cd', container: '#modeCD',
+    step1: 'BV ও EV ফাইল দিন', hint1: 'প্রতিটি ফাইল = একটি Set · প্রশ্নগুলো আগে ২ কলামে, তারপর নমুনা উত্তর ২ কলামে',
+    dropEx: 'যেমন: Cadet_2027_M.T._Daily_Exam_Math-06_Written_Set-A_BV.docx · …_Set-B_EV.docx (প্রতি গ্রুপে সর্বোচ্চ ১০টি)',
+    groups: [{ key: 'wr', kind: 'cadet', title: 'Written', icon: '✍️', minSlots: 10 }],
+    assetKey: (k, lang) => `cd_${k}_${lang}`,
+    DEF: {
+      BV: { hLeft: 'ক্যাডেট কলেজ ভর্তি প্রস্তুতি মডেল টেস্ট-২০২৭', hRight: 'সলভ শীট: গণিত-০৬', b1: 'ক্যাডেট কলেজ', b2: 'ভর্তি প্রস্তুতি', b3: '২০২৭', b4: '', title: 'সলভ শীট: গণিত-০৬', ribTop: 'Written', ans: 'নমুনা উত্তর', footerMode: 'original', fLeft: 'উদ্ভাস একাডেমিক এন্ড এডমিশন কেয়ার', fRight: 'পরিবর্তনের প্রত্যয়ে নিরন্তর পথচলা...', coverF: 'default', coverB: 'default', out: 'Cadet_Solve_Sheet_Math-06_BV.docx' },
+      EV: { hLeft: 'Cadet College Admission Preparation Model Test-2027', hRight: 'Solve Sheet: Math-06', b1: 'Cadet College', b2: 'Admission', b3: 'Preparation', b4: '2027', title: 'Solve Sheet: Math-06', ribTop: 'Written', ans: 'Sample Answer', footerMode: 'original', fLeft: 'UDVASH Academic & Admission Care', fRight: 'পরিবর্তনের প্রত্যয়ে নিরন্তর পথচলা...', coverF: 'default', coverB: 'default', out: 'Cadet_Solve_Sheet_Math-06_EV.docx' },
     },
   });
   window.__parts = parts;

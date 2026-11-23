@@ -16,10 +16,11 @@ c5_assets = {
     'footer_BV': data_url(c5 / 'footer_orig_BV.png'), 'footer_EV': data_url(c5 / 'footer_orig_EV.png'),
     'footer_logo': data_url(c5 / 'footer_logo.png'),
 }
-for lang in ('BV', 'EV'):  # Class 8
-    c5_assets[f'c8_cover_front_{lang}'] = data_url(c5 / f'c8_cover_front_{lang}.jpg')
-    c5_assets[f'c8_cover_back_{lang}'] = data_url(c5 / f'c8_cover_back_{lang}.jpg')
-    c5_assets[f'c8_footer_{lang}'] = data_url(c5 / f'c8_footer_orig_{lang}.png')
+for pre in ('c8', 'cd'):  # Class 8, Cadet
+    for lang in ('BV', 'EV'):
+        c5_assets[f'{pre}_cover_front_{lang}'] = data_url(c5 / f'{pre}_cover_front_{lang}.jpg')
+        c5_assets[f'{pre}_cover_back_{lang}'] = data_url(c5 / f'{pre}_cover_back_{lang}.jpg')
+        c5_assets[f'{pre}_footer_{lang}'] = data_url(c5 / f'{pre}_footer_orig_{lang}.png')
 html = (rd('index.src.html')
         .replace('/*__ENGINE__*/', rd('engine.js'))
         .replace('/*__C5ENGINE__*/', rd('c5engine.js'))
