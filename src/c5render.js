@@ -540,8 +540,8 @@ async function renderC5Pages(blob, opt) {
     const pg = document.createElement('div'); pg.className = 'c5page'; pg.style.cssText = `width:${pageW}px;height:${pageH}px`;
     if (kind === 'content') {
       pageNo++;
-      pg.innerHTML = `<img class="hbg" src="${opt.headerUrl}" style="top:${0.5 * 96}px"><div class="htxt ${opt.lang}" style="top:${0.5 * 96}px;height:${opt.headerH}px"><span class="l" style="font-size:${(opt.S.hSzL || 24) / 2}pt">${esc(opt.S.hLeft)}</span><span class="r" style="font-size:${(opt.S.hSzR || 24) / 2}pt">${esc(opt.S.hRight)}</span></div>
-        <img class="fbg" src="${opt.footerUrl}" style="top:${10.24 * 96}px"><div class="ftxt ${opt.lang} ${opt.S.footerMode}" style="top:${10.24 * 96}px;height:${opt.footerH}px">${opt.S.footerMode === 'custom' ? `<span class="l">${esc(opt.S.fLeft)}</span><span class="r">${esc(opt.S.fRight)}</span>` : ''}<span class="n">${opt.lang === 'BV' ? bnDigits(pageNo) : pageNo}</span></div>`;
+      pg.innerHTML = `<img class="hbg" src="${opt.headerUrl}" style="top:${P.bandY * 96}px"><div class="htxt ${opt.lang}" style="top:${P.bandY * 96}px;height:${opt.headerH}px"><span class="l" style="font-size:${(opt.S.hSzL || 24) / 2}pt">${esc(opt.S.hLeft)}</span><span class="r" style="font-size:${(opt.S.hSzR || 24) / 2}pt">${esc(opt.S.hRight)}</span></div>
+        <img class="fbg" src="${opt.footerUrl}" style="top:${P.footY * 96}px"><div class="ftxt ${opt.lang} ${opt.S.footerMode}" style="top:${P.footY * 96}px;height:${opt.footerH}px">${opt.S.footerMode === 'custom' ? `<span class="l">${esc(opt.S.fLeft)}</span><span class="r">${esc(opt.S.fRight)}</span>` : ''}<span class="n">${opt.lang === 'BV' ? bnDigits(pageNo) : pageNo}</span></div>`;
       const bd = document.createElement('div'); bd.className = 'c5body'; bd.style.cssText = `left:${P.left * TW2PX}px;top:${P.top * TW2PX}px;width:${cw}px;height:${ch}px`; pg.appendChild(bd); pg._body = bd;
     }
     root.appendChild(pg); pages.push(pg); page = kind === 'content' ? pg : null; y = 0; return pg;
