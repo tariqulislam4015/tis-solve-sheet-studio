@@ -906,13 +906,13 @@ if (typeof module !== 'undefined') module.exports = { readZip, writeZip, parseSo
 
 /* ===================== Class 5 (Primary Scholarship) Solve Sheet engine ===================== */
 // marks-distribution label: Unicode or Bijoy (SutonnyMJ) spelling, optionally after a bracket / bullet
-const C5_MARK_SRC = '(?:(?:নম্বর|নাম্বার|নম্বরের|মান|মার্কস?)[\\s  \\-]*(?:ব[ণন]্টন|বিভাজন|বিন্যাস)|Marks?[\\s  \\-]*(?:Distribution|Allocation|Break[\\s\\-]?down|Scheme)|b¤\\^?i\\s*e[ÈY]&?U?b|bv¤\\^?vi\\s*e[ÈY]&?U?b|gvb\\s*e[ÈY]&?U?b)';
+const C5_MARK_SRC = '(?:(?:নম্বর|নাম্বার|নম্বরের|মান|মার্কস?)[\\s  \\-]*(?:ব[ণন]্টন|বিভাজন|বিন্যাস)|(?:(?:Marks?|Marking|Numbers?|Scores?|Points?)[\\s  \\-]*(?:Distributions?|Allocations?|Break[\\s\\-]?downs?|Schemes?|Divisions?|Splits?)|Distribution[\\s  ]*of[\\s  ]*(?:the[\\s  ]*)?(?:Marks?|Numbers?|Scores?|Points?)|(?:Marking|Scoring)[\\s  ]*(?:Guide|Rubric|Criteria)|Rubrics?)(?=[\\s  ]*(?:[:：\\-–—=(\\[]|$))|b¤\\^?i\\s*e[ÈY]&?U?b|bv¤\\^?vi\\s*e[ÈY]&?U?b|gvb\\s*e[ÈY]&?U?b)';
 const C5 = {
   MAINQ: /^[\s ]*([০-৯]{1,2}[\s ]*।|\d{1,2}[\s ]*\.(?!\d))/,
   ANS: /^[\s ]*([০-৯\d]+[\s ]*নং[\s ]*প্রশ্নের[\s ]*উত্তর|Answers?[\s ]+(?:to|of)[\s ]+(?:the[\s ]+)?question(?:[\s ]*no\.?)?[\s ]*\(?\d+\)?)[\s ]*[:：]?/i,
-  MARK: new RegExp('^[\\s  \\t\\[\\(\\{【*•∙·◦▪■□◆◇❖►▶➤⇒→\\-–—#]*' + C5_MARK_SRC, 'i'),
+  MARK: new RegExp('^[\\s  \\t\\[\\(\\{【*•∙·◦▪■□◆◇❖►▶➤⇒→\\-–—#]*(?:' + C5_MARK_SRC + '|Marks?[\\s  ]*[:：]|নম্বর[\\s  ]*[:：ঃ])', 'i'),
   MARK_IN: new RegExp(C5_MARK_SRC, 'i'),
-  MARKWORD: /নম্বর|নাম্বার|মার্ক|\bmarks?\b|b¤\^?i/i,
+  MARKWORD: /নম্বর|নাম্বার|মার্ক|\bmarks?\b|\bpoints?\b|b¤\^?i/i,
   NOTE: /^[\s ]*[\[(][\s ]*(?:বি[\s .]*[ঃ:.]?[\s ]*দ্র[\s .]*[ঃ:.]|N\.?\s*B\.?[\s ]*[:：])/i,
   STOP: /^[\s ]*(\((?:ক|খ|গ|ঘ|ঙ|চ|ছ|জ|ঝ|ঞ|a|b|c|d|e|f|g|h|i|j)\)|[০-৯]{1,2}[\s ]*।|[০-৯\d]+[\s ]*নং|Answers?[\s ]+(?:to|of)|উত্তর[\s ]*[:：ঃ]|Answers?[\s ]*[:：])/i,
   // '(ক) নং প্রশ্নের উত্তর:' / 'Answer to question no. (a):' — the label '(ক)' is kept in front of the answer
@@ -940,15 +940,20 @@ function c5Meta(fileName, text) {
    Works on any list of blocks (body or a table cell): a label paragraph / table / text box removes itself and the
    lines that belong to it — also across blank lines and '(ক) … ১ নম্বর' style lines — up to the next answer or question. */
 function c5StripMarks(list, st, ctx) {
-  const txt = el => c5n(plainText(el)).trim();
+  // tables: cell texts joined with spaces so 'Step | Marks' does not read as 'StepMarks'
+  const txt = el => c5n(isW(el, 'tbl') ? q(el, NS.w, 'p').map(plainText).join(' ') : plainText(el)).trim();
   const isEmpty = el => isW(el, 'p') && !txt(el) && !hasDrawing(el) && !q(el, NS.m, 'oMath').length;
   const marky = t => C5.MARKWORD.test(t) || (/জন্য|\bfor\b/i.test(t) && /[০-৯\d½¼¾][\s ]*(?:নম্বর|marks?)?[\s )\]।.]*$/i.test(t) && t.length < 110);
   const isMainQ = (el, t) => { if (!isW(el, 'p')) return false; const m = t.match(C5.MAINQ); if (!m) return false; return /^[\s ]*[০-৯]/.test(t) || c5Digit(m[1]) === ctx.lastMain + 1; };
   // a short line that ends in a number ('সঠিক উত্তর — ১', '(ক) অংশ ২ নম্বর')
   const markLine = t => marky(t) || (t.length < 70 && /[০-৯\d½¼¾][\s ]*(?:নম্বর|marks?)?[\s )\]।.]*$/i.test(t));
   // a full answer sentence / equation that follows the marks block without a blank line
-  const answerish = (el, t) => !markLine(t) && (t.length > 120 || q(el, NS.m, 'oMath').length > 0 || /[।.?!:][\s ]*$/.test(t));
-  const ender = (el, t) => C5.SUBANS.test(t) || C5.ANS.test(t) || C5.BAREANS.test(t) || C5.HEAD.test(t) || C5.MARK.test(t) || isMainQ(el, t)
+  // typical first words of a marks line ('For correct formula …', 'Writing the formula …', 'সঠিক উত্তর …')
+  const markStart = t => /^[\s ]*(?:[-•*▪◦]|\(?[a-hক-ঙ]\)|\(?[ivx]+\)|for\b|correct|writing|formula|step|using|finding|drawing|calculat|proper|right|identif|explain|mention|সঠিক|সূত্র|ধাপ|মান[\s ]*বসা|লেখার|নির্ণয়|ব্যাখ্যা|চিত্র[\s ]*অঙ্কন)/i.test(t) && t.length < 100;
+  const answerish = (el, t) => !markLine(t) && !markStart(t) && (t.length > 120 || q(el, NS.m, 'oMath').length > 0 || /[।.?!:][\s ]*$/.test(t));
+  // an answer line that only carries marks inside it ('… = 38 [2 marks]', '… (Marks distribution: …)') is kept; its marks part is cut later
+  const withInline = t => { let r = t; const m = C5.MARK_IN.exec(r); if (m && m.index > 0) r = r.slice(0, m.index); r = r.replace(/[\[(（【][^\[\]()（）【】]{0,40}?(?:নম্বর|নাম্বার|\bmarks?\b)[^\[\]()（）【】]{0,20}[\])）】]/gi, ''); return r !== t && r.replace(/[\s ()\[\]:：\-–—]/g, '').length > 12; };
+  const ender = (el, t) => (isW(el, 'p') && withInline(t)) || C5.SUBANS.test(t) || C5.ANS.test(t) || C5.BAREANS.test(t) || C5.HEAD.test(t) || C5.MARK.test(t) || isMainQ(el, t)
     || (C5.STOP.test(t) && !markLine(t)) || (isW(el, 'tbl') && !marky(t)) || (hasDrawing(el) && !marky(t)) || (isW(el, 'p') && answerish(el, t));
   const out = [];
   // text boxes that hold a marks distribution go first, so their text never decides about the paragraph around them
